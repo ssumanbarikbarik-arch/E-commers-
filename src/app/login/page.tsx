@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,7 +28,8 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (user) {
-            router.push('/account');
+            const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/account';
+            router.push(redirectUrl);
         }
     }, [user, router]);
 
@@ -37,7 +38,8 @@ export default function LoginPage() {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             toast({ title: 'Login Successful', description: `Welcome back!` });
-            router.push('/account');
+            const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/account';
+            router.push(redirectUrl);
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Login Failed', description: error.message });
         }
