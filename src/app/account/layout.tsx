@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link";
@@ -42,7 +43,7 @@ export default function AccountLayout({
   return (
     <div className="container mx-auto py-12">
         <h1 className="text-4xl font-headline mb-2">My Account</h1>
-        <p className="text-muted-foreground mb-10">Welcome back, {user?.displayName}!</p>
+        <p className="text-muted-foreground mb-10">Welcome back, Foysal Doe!</p>
         <div className="grid md:grid-cols-4 gap-10">
             <aside className="md:col-span-1">
                 <nav className="flex flex-col space-y-2">
