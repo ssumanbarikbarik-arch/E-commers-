@@ -16,23 +16,23 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Truck } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser } from "@/firebase";
 import { useEffect } from "react";
 
 export default function CheckoutPage() {
   const { state, dispatch } = useCart();
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isUserLoading } = useUser();
 
   useEffect(() => {
-    if (!user) {
+    if (!isUserLoading && !user) {
         router.push('/login?redirect=/checkout');
     }
     if (state.items.length === 0) {
       router.push('/products');
     }
-  }, [state.items, router, user]);
+  }, [state.items, router, user, isUserLoading]);
 
   const subtotal = state.items.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -51,7 +51,7 @@ export default function CheckoutPage() {
     router.push("/account/orders");
   };
 
-  if (!user || state.items.length === 0) {
+  if (isUserLoading || !user || state.items.length === 0) {
     return (
         <div className="flex justify-center items-center h-[50vh]">
             <p>Loading...</p>

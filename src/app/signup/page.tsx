@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth, useUser } from '@/firebase';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,19 +13,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
-    const { login } = useAuth();
+    const auth = useAuth();
+    const { user } = useUser();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const { toast } = useToast();
+    const router = useRouter();
 
-    const handleSignup = (e: React.FormEvent) => {
+    useEffect(() => {
+        if (user) {
+            router.push('/account');
+        }
+    }, [user, router]);
+
+    const handleSignup = async (e: FormEvent) => {
         e.preventDefault();
-        // In a real app, you'd call a signup function.
-        // Here we'll just log in the user to simulate account creation.
-        login(email, password);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, { displayName: name });
+            toast({ title: 'Signup Successful', description: 'Welcome! You are now logged in.' });
+            router.push('/account');
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Signup Failed', description: error.message });
+        }
     }
 
   return (
@@ -35,7 +52,7 @@ export default function SignupPage() {
             <CardHeader className="text-center">
                 <CardTitle className="text-3xl font-headline">Create an Account</CardTitle>
                 <CardDescription>Join Thread Canvas to start your style journey.</CardDescription>
-            </CardHeader>
+            </Header>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>

@@ -15,10 +15,11 @@ import { Menu, ShoppingCart, User, LogOut, LayoutDashboard, Truck } from 'lucide
 import { Icons } from '@/components/icons';
 import { useCart } from '@/hooks/use-cart';
 import { CartSheet } from './cart-sheet';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth, useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import React from 'react';
+import { signOut } from 'firebase/auth';
 
 const navLinks = [
   { href: '/products', label: 'All Products' },
@@ -28,7 +29,8 @@ const navLinks = [
 
 export function Header() {
   const { state: cartState } = useCart();
-  const { user, logout } = useAuth();
+  const { user } = useUser();
+  const auth = useAuth();
   const [isCartOpen, setCartOpen] = React.useState(false);
 
   const cartItemCount = cartState.items.reduce(
@@ -36,7 +38,8 @@ export function Header() {
     0
   );
   
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return '';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
 
@@ -116,15 +119,15 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                       <AvatarImage src={`https://avatar.vercel.sh/${user.email}.png`} alt={user.name} />
-                       <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                       <AvatarImage src={user.photoURL ?? `https://avatar.vercel.sh/${user.email}.png`} alt={user.displayName ?? ""} />
+                       <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-sm font-medium leading-none">{user.displayName}</p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user.email}
                       </p>
@@ -150,7 +153,7 @@ export function Header() {
                      </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logout()}>
+                  <DropdownMenuItem onClick={() => signOut(auth)}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>

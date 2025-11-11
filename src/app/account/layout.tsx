@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { User, Truck, MapPin, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser, useAuth } from "@/firebase";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { signOut } from "firebase/auth";
 
 const navItems = [
     { href: "/account", label: "Profile", icon: User },
@@ -20,16 +21,17 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [user, isUserLoading, router]);
 
-  if (!user) {
+  if (isUserLoading || !user) {
       return (
         <div className="flex justify-center items-center h-[50vh]">
             <p>Loading...</p>
@@ -40,7 +42,7 @@ export default function AccountLayout({
   return (
     <div className="container mx-auto py-12">
         <h1 className="text-4xl font-headline mb-2">My Account</h1>
-        <p className="text-muted-foreground mb-10">Welcome back, {user?.name}!</p>
+        <p className="text-muted-foreground mb-10">Welcome back, {user?.displayName}!</p>
         <div className="grid md:grid-cols-4 gap-10">
             <aside className="md:col-span-1">
                 <nav className="flex flex-col space-y-2">
@@ -57,7 +59,7 @@ export default function AccountLayout({
                             {item.label}
                         </Link>
                     ))}
-                     <Button variant="ghost" className="justify-start px-3 text-muted-foreground" onClick={logout}>
+                     <Button variant="ghost" className="justify-start px-3 text-muted-foreground" onClick={() => signOut(auth)}>
                         <LogOut className="h-5 w-5 mr-3"/>
                         Logout
                     </Button>
