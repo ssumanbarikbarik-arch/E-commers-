@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,11 +16,13 @@ import { Label } from "@/components/ui/label";
 import Link from 'next/link';
 import { useState, FormEvent, useEffect } from 'react';
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
     const auth = useAuth();
+    const firestore = useFirestore();
     const { user, isUserLoading } = useUser();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -36,7 +39,27 @@ export default function LoginPage() {
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+
+            const userDocRef = doc(firestore, "users", firebaseUser.uid);
+            const docSnap = await getDoc(userDocRef);
+
+            if (!docSnap.exists()) {
+                const nameParts = firebaseUser.displayName?.split(' ') || ['',''];
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+
+                await setDoc(userDocRef, {
+                    id: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    addresses: [],
+                    paymentMethods: []
+                });
+            }
+
             toast({ title: 'Login Successful', description: `Welcome back!` });
             const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/account';
             router.push(redirectUrl);
