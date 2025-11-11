@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth, useUser } from '@/firebase';
@@ -17,9 +18,12 @@ import { useState, FormEvent, useEffect } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { doc, setDoc } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 export default function SignupPage() {
     const auth = useAuth();
+    const firestore = useFirestore();
     const { user } = useUser();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -37,7 +41,25 @@ export default function SignupPage() {
         e.preventDefault();
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(userCredential.user, { displayName: name });
+            const firebaseUser = userCredential.user;
+            await updateProfile(firebaseUser, { displayName: name });
+            
+            // Create a document in the 'users' collection
+            const userDocRef = doc(firestore, "users", firebaseUser.uid);
+
+            const nameParts = name.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            await setDoc(userDocRef, {
+                id: firebaseUser.uid,
+                email: firebaseUser.email,
+                firstName: firstName,
+                lastName: lastName,
+                addresses: [],
+                paymentMethods: []
+            });
+
             toast({ title: 'Signup Successful', description: 'Welcome! You are now logged in.' });
             router.push('/account');
         } catch (error: any) {
