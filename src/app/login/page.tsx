@@ -42,23 +42,26 @@ export default function LoginPage() {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
 
-            const userDocRef = doc(firestore, "users", firebaseUser.uid);
-            const docSnap = await getDoc(userDocRef);
+            if (firestore) {
+                const userDocRef = doc(firestore, "users", firebaseUser.uid);
+                const docSnap = await getDoc(userDocRef);
 
-            if (!docSnap.exists()) {
-                const nameParts = firebaseUser.displayName?.split(' ') || ['',''];
-                const firstName = nameParts[0] || '';
-                const lastName = nameParts.slice(1).join(' ') || '';
+                if (!docSnap.exists()) {
+                    const nameParts = firebaseUser.displayName?.split(' ') || ['',''];
+                    const firstName = nameParts[0] || '';
+                    const lastName = nameParts.slice(1).join(' ') || '';
 
-                await setDoc(userDocRef, {
-                    id: firebaseUser.uid,
-                    email: firebaseUser.email,
-                    firstName: firstName,
-                    lastName: lastName,
-                    addresses: [],
-                    paymentMethods: []
-                });
+                    await setDoc(userDocRef, {
+                        id: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        firstName: firstName,
+                        lastName: lastName,
+                        addresses: [],
+                        paymentMethods: []
+                    });
+                }
             }
+
 
             toast({ title: 'Login Successful', description: `Welcome back!` });
             const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/account';
@@ -85,7 +88,7 @@ export default function LoginPage() {
                         <CardDescription>Redirecting you to your account...</CardDescription>
                     </CardHeader>
                      <CardFooter className="flex flex-col gap-4">
-                        <Button className="w-full" onClick={() => signOut(auth)}>Sign Out</Button>
+                        <Button className="w-full" onClick={() => auth ? signOut(auth) : {}}>Sign Out</Button>
                     </CardFooter>
                 </Card>
             </div>

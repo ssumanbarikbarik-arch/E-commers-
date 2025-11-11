@@ -39,6 +39,11 @@ export default function SignupPage() {
 
     const handleSignup = async (e: FormEvent) => {
         e.preventDefault();
+        if (!firestore) {
+            toast({ variant: 'destructive', title: 'Signup Failed', description: 'Database not available' });
+            return;
+        }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const firebaseUser = userCredential.user;
