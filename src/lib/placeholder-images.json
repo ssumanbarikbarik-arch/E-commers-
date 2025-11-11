@@ -1,3 +1,100 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "classic-denim-jacket-1",
+      "description": "Front view of a classic denim jacket.",
+      "imageUrl": "https://images.unsplash.com/photo-1614699745279-2c61bd9d46b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkZW5pbSUyMGphY2tldHxlbnwwfHx8fDE3NjI3OTMzMzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "denim jacket"
+    },
+    {
+      "id": "classic-denim-jacket-2",
+      "description": "Back view of a classic denim jacket.",
+      "imageUrl": "https://images.unsplash.com/photo-1608147152875-b0eb0c53d491?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkZW5pbSUyMGphY2tldHxlbnwwfHx8fDE3NjI3OTMzMzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "denim jacket"
+    },
+    {
+      "id": "linen-blend-shirt-1",
+      "description": "A man wearing a linen blend shirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1582261484646-a545de6d2382?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMHNoaXJ0fGVufDB8fHx8MTc2Mjc4OTUxNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "linen shirt"
+    },
+    {
+      "id": "linen-blend-shirt-2",
+      "description": "Close up of a linen blend shirt fabric.",
+      "imageUrl": "https://images.unsplash.com/photo-1594734415578-00fc9540929b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmYWJyaWMlMjB0ZXh0dXJlfGVufDB8fHx8MTc2Mjg2Mzc4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fabric texture"
+    },
+    {
+      "id": "slim-fit-chinos-1",
+      "description": "A person wearing slim-fit chinos.",
+      "imageUrl": "https://images.unsplash.com/photo-1710575478415-366d38849f40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2hpbm9zJTIwcGFudHN8ZW58MHx8fHwxNzYyODg2MjExfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "chinos pants"
+    },
+    {
+      "id": "slim-fit-chinos-2",
+      "description": "Side view of slim-fit chinos.",
+      "imageUrl": "https://images.unsplash.com/photo-1552904219-f4b87efe8792?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwYW50cyUyMGZhc2hpb258ZW58MHx8fHwxNzYyODg2MjExfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pants fashion"
+    },
+    {
+      "id": "merino-wool-sweater-1",
+      "description": "A merino wool sweater on a hanger.",
+      "imageUrl": "https://images.unsplash.com/photo-1588271968087-4c51abe05afc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b29sJTIwc3dlYXRlcnxlbnwwfHx8fDE3NjI4NzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wool sweater"
+    },
+    {
+      "id": "merino-wool-sweater-2",
+      "description": "Close up of merino wool texture.",
+      "imageUrl": "https://images.unsplash.com/photo-1636716018960-eb737dccb185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3b29sJTIwdGV4dHVyZXxlbnwwfHx8fDE3NjI4ODYyMTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wool texture"
+    },
+    {
+      "id": "leather-biker-jacket-1",
+      "description": "A person wearing a leather biker jacket.",
+      "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsZWF0aGVyJTIwamFja2V0fGVufDB8fHx8MTc2MjgyNTUzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather jacket"
+    },
+    {
+      "id": "leather-biker-jacket-2",
+      "description": "Detail of the leather biker jacket zipper.",
+      "imageUrl": "https://images.unsplash.com/photo-1612889002697-ac0a7fa8fde4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxqYWNrZXQlMjB6aXBwZXJ8ZW58MHx8fHwxNzYyODgzODI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "jacket zipper"
+    },
+    {
+      "id": "graphic-print-t-shirt-1",
+      "description": "Front of a graphic print t-shirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1745179294283-f9d069f4d38d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxncmFwaGljJTIwdHNoaXJ0fGVufDB8fHx8MTc2MjgyMDk2OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "graphic tshirt"
+    },
+    {
+      "id": "graphic-print-t-shirt-2",
+      "description": "Model wearing a graphic print t-shirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1630167146816-e1f4ff99c00c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8dHNoaXJ0JTIwbW9kZWx8ZW58MHx8fHwxNzYyNzgzMTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tshirt model"
+    },
+    {
+      "id": "tailored-wool-blazer-1",
+      "description": "Front of a tailored wool blazer.",
+      "imageUrl": "https://images.unsplash.com/photo-1659342976282-a7032ceb4024?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b29sJTIwYmxhemVyfGVufDB8fHx8MTc2MjgxOTQwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wool blazer"
+    },
+    {
+      "id": "tailored-wool-blazer-2",
+      "description": "Side of a tailored wool blazer.",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1553802922-5f7e9934e328?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxibGF6ZXIlMjBmYXNoaW9ufGVufDB8fHx8MTc2Mjg4NjIxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "blazer fashion"
+    },
+    {
+      "id": "silk-evening-gown-1",
+      "description": "A woman in a silk evening gown.",
+      "imageUrl": "https://images.unsplash.com/photo-1710023209229-ec9877bbb95b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxldmVuaW5nJTIwZ293bnxlbnwwfHx8fDE3NjI4MTA3ODF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "evening gown"
+    },
+    {
+      "id": "silk-evening-gown-2",
+      "description": "Detail of the silk fabric on an evening gown.",
+      "imageUrl": "https://images.unsplash.com/photo-1619043599439-9b750b7b2623?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxzaWxrJTIwZmFicmljfGVufDB8fHx8MTc2Mjg3OTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "silk fabric"
+    }
+  ]
 }
