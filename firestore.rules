@@ -1,0 +1,203 @@
+/**
+ * @fileoverview Firestore Security Rules for the Thread Canvas e-commerce application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for all user-related data,
+ * while allowing public read access to the product catalog.  Path-based ownership
+ * is the primary means of access control, avoiding costly `get()` calls within rules.
+ *
+ * Data Structure:
+ * - `/products/{productId}`: Public product catalog.
+ * - `/users/{userId}`: User profiles, accessible only by the user.
+ * - `/users/{userId}/addresses/{addressId}`: User addresses, accessible only by the user.
+ * - `/users/{userId}/paymentMethods/{paymentMethodId}`: User payment methods, accessible only by the user.
+ * - `/users/{userId}/orders/{orderId}`: User orders, accessible only by the user.
+ * - `/users/{userId}/orders/{orderId}/orderItems/{orderItemId}`: Items within a user's order, accessible only by the user.
+ * - `/users/{userId}/recommendations/{recommendationId}`: AI-powered recommendations for a user, accessible only by the user.
+ * - `/users/{userId}/cart`: User's shopping cart, accessible only by the user.
+ * - `/users/{userId}/cart/cartItems/{cartItemId}`: Items in the user's shopping cart, accessible only by the user.
+ *
+ * Key Security Decisions:
+ * - Users can only access their own data.
+ * - The product catalog is publicly readable.
+ * - Data validation is limited to ownership checks and relational integrity.
+ * - List operations are secured based on path-based ownership.
+ *
+ * Denormalization for Authorization:
+ *  - Path-based ownership eliminates the need to denormalize user IDs onto subcollection documents. The path `/users/{userId}/...` inherently signifies ownership.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to product information. Only owners can create, update, or delete products.
+     * @path /products/{productId}
+     * @allow get, list: if true;
+     * @allow create: if request.resource.data.id == request.auth.uid; // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @principle Allows public read access with owner-only writes for product catalog.
+     */
+    match /products/{productId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+
+    /**
+     * @description Allows a user to read, update, and delete their own user document.
+     * @path /users/{userId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if request.auth.uid == userId;
+     * @allow update: if isExistingOwner(userId);
+     * @allow delete: if isExistingOwner(userId);
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if request.auth.uid == userId;
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows a user to manage their own addresses.
+     * @path /users/{userId}/addresses/{addressId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.userId == userId;
+     * @allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/addresses/{addressId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+    }
+
+    /**
+     * @description Allows a user to manage their own payment methods.
+     * @path /users/{userId}/paymentMethods/{paymentMethodId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.userId == userId;
+     * @allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/paymentMethods/{paymentMethodId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+    }
+
+    /**
+     * @description Allows a user to manage their own orders.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.userId == userId;
+     * @allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+    }
+
+    /**
+     * @description Allows a user to manage items within their own orders.
+     * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
+     * @allow update: if isExistingOwner(userId) && resource.data.orderId == resource.data.orderId;
+     * @allow delete: if isExistingOwner(userId) && resource.data.orderId == resource.data.orderId;
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
+      allow update: if isExistingOwner(userId) && resource.data.orderId == resource.data.orderId;
+      allow delete: if isExistingOwner(userId) && resource.data.orderId == resource.data.orderId;
+    }
+
+    /**
+     * @description Allows a user to manage their own recommendations.
+     * @path /users/{userId}/recommendations/{recommendationId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.userId == userId;
+     * @allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/recommendations/{recommendationId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+    }
+
+    /**
+     * @description Allows a user to manage their own cart.
+     * @path /users/{userId}/cart
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.userId == userId;
+     * @allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/cart {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
+    }
+    
+     /**
+     * @description Allows a user to manage items in their own cart.
+     * @path /users/{userId}/cart/cartItems/{cartItemId}
+     * @allow get, list: if isOwner(userId);
+     * @allow create: if isOwner(userId) && request.resource.data.cartId == parentPathSegment();
+     * @allow update: if isExistingOwner(userId) && resource.data.cartId == parentPathSegment();
+     * @allow delete: if isExistingOwner(userId) && resource.data.cartId == parentPathSegment();
+     * @principle Enforces document ownership for writes and relational integrity.
+     */
+    match /users/{userId}/cart/cartItems/{cartItemId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.cartId == parentPathSegment();
+      allow update: if isExistingOwner(userId) && resource.data.cartId == parentPathSegment();
+      allow delete: if isExistingOwner(userId) && resource.data.cartId == parentPathSegment();
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    function parentPathSegment() {
+      return request.path.split("/")[6];
+    }
+  }
+}
