@@ -52,7 +52,7 @@ export default function SignupPage() {
             <CardHeader className="text-center">
                 <CardTitle className="text-3xl font-headline">Create an Account</CardTitle>
                 <CardDescription>Join Thread Canvas to start your style journey.</CardDescription>
-            </Header>
+            </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
