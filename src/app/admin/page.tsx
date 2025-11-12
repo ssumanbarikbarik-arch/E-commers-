@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Box /> Content Management</CardTitle>
                             <CardDescription>Manage your store's products, orders, and users.</CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent className="grid sm:grid-cols-3 gap-4">
                             <Card className="hover:bg-muted/50 transition-colors">
                                 <Link href="#">
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
                                 <Link href="#">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><ShoppingCart /> Manage Orders</CardTitle>
-                                    </Header>
+                                    </CardHeader>
                                     <CardContent>
                                         <p className="text-sm text-muted-foreground">View and process customer orders.</p>
                                     </CardContent>
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
                                 <Link href="#">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><Users /> Manage Users</CardTitle>
-                                    </Header>
+                                    </CardHeader>
                                     <CardContent>
                                         <p className="text-sm text-muted-foreground">View and manage customer accounts.</p>
                                     </CardContent>
