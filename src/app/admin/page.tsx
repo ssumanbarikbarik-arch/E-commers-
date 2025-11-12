@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
                                 <Link href="#">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><ShoppingCart /> Manage Orders</CardTitle>
-                                    </A_SECOND_ONE>
+                                    </CardHeader>
                                     <CardContent>
                                         <p className="text-sm text-muted-foreground">View and process customer orders.</p>
                                     </CardContent>
