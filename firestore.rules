@@ -48,17 +48,17 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows a user to read, update, and delete their own user document.
+     * @description Allows a user to read, update, and delete their own user document. Admins can list all users.
      * @path /users/{userId}
-     * @allow get, list: if isOwner(userId);
+     * @allow get, list: if isOwner(userId) || isAdmin();
      * @allow create: if request.auth.uid == userId;
      * @allow update: if isExistingOwner(userId);
      * @allow delete: if isExistingOwner(userId);
-     * @principle Enforces document ownership for all operations.
+     * @principle Enforces document ownership for all operations, with admin override for listing.
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow list: if isAdmin();
       allow create: if request.auth.uid == userId;
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
@@ -194,6 +194,12 @@ service cloud.firestore {
 
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
+    }
+
+    function isAdmin() {
+      // For now, we will use a specific UID as the admin.
+      // In a real app, you might use custom claims or a roles collection.
+      return request.auth.uid == "pXoTol5xMwMPe8nxAXat5Ozpuxt1";
     }
 
     function parentPathSegment() {
