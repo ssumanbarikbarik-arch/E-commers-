@@ -36,11 +36,8 @@ export default function AdminDashboardPage() {
         firestore ? query(collection(firestore, 'users')) : null
     );
     
-    // Note: This query now relies on admin privileges to read all orders subcollections.
-    // This is not efficient for large-scale applications.
-    // In a real-world app, you would use a summary collection or cloud function.
     const { data: orders, isLoading: isLoadingOrders } = useCollection(
-        firestore ? query(collection(firestore, `users/pXoTol5xMwMPe8nxAXat5Ozpuxt1/orders`)) : null
+        firestore ? query(collection(firestore, 'users/pXoTol5xMwMPe8nxAXat5Ozpuxt1/orders')) : null
     );
 
 
@@ -105,7 +102,7 @@ export default function AdminDashboardPage() {
                         <Link href="#">
                             <CardHeader>
                                 <CardTitle className="text-xl flex items-center gap-2"><ShoppingCart /> Manage Orders</CardTitle>
-                            </CardHeader>
+                            </Header>
                             <CardContent>
                                 <p className="text-sm text-muted-foreground">View and process customer orders.</p>
                             </CardContent>
@@ -115,7 +112,7 @@ export default function AdminDashboardPage() {
                         <Link href="#">
                             <CardHeader>
                                 <CardTitle className="text-xl flex items-center gap-2"><Users /> Manage Users</CardTitle>
-                            </CardHeader>
+                            </Header>
                             <CardContent>
                                 <p className="text-sm text-muted-foreground">View and manage customer accounts.</p>
                             </CardContent>
