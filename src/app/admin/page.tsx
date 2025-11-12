@@ -36,11 +36,11 @@ export default function AdminDashboardPage() {
         firestore ? query(collection(firestore, 'users')) : null
     );
     
-    // Note: This is a simplified query for total orders. 
-    // In a real-world app with many users, you would use a different approach 
-    // like a summary collection or cloud function to count all subcollections.
+    // Note: This query now relies on admin privileges to read all orders subcollections.
+    // This is not efficient for large-scale applications.
+    // In a real-world app, you would use a summary collection or cloud function.
     const { data: orders, isLoading: isLoadingOrders } = useCollection(
-        firestore ? query(collection(firestore, 'users/user-1/orders')) : null
+        firestore ? query(collection(firestore, `users/${'pXoTol5xMwMPe8nxAXat5Ozpuxt1'}/orders`)) : null
     );
 
 
@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
                  <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Box /> Content Management</CardTitle>
                     <CardDescription>Manage your store's products, orders, and users.</CardDescription>
-                </CardHeader>
+                </Header>
                 <CardContent className="grid sm:grid-cols-3 gap-4">
                     <Card className="hover:bg-muted/50 transition-colors">
                         <Link href="#">

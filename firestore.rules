@@ -99,17 +99,16 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows a user to manage their own orders.
+     * @description Allows a user to manage their own orders, and admins to read them.
      * @path /users/{userId}/orders/{orderId}
-     * @allow get, list: if isOwner(userId);
+     * @allow get, list: if isOwner(userId) || isAdmin();
      * @allow create: if isOwner(userId) && request.resource.data.userId == userId;
      * @allow update: if isExistingOwner(userId) && resource.data.userId == userId;
      * @allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
-     * @principle Enforces document ownership for writes and relational integrity.
+     * @principle Enforces document ownership for writes and relational integrity, with admin read override.
      */
     match /users/{userId}/orders/{orderId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get, list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
       allow update: if isExistingOwner(userId) && resource.data.userId == userId;
       allow delete: if isExistingOwner(userId) && resource.data.userId == userId;
