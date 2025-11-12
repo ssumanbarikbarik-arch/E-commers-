@@ -40,7 +40,7 @@ export default function AdminDashboardPage() {
     // This is not efficient for large-scale applications.
     // In a real-world app, you would use a summary collection or cloud function.
     const { data: orders, isLoading: isLoadingOrders } = useCollection(
-        firestore ? query(collection(firestore, `users/${'pXoTol5xMwMPe8nxAXat5Ozpuxt1'}/orders`)) : null
+        firestore ? query(collection(firestore, `users/pXoTol5xMwMPe8nxAXat5Ozpuxt1/orders`)) : null
     );
 
 
