@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Bot, Box, ShoppingCart, Users } from "lucide-react";
-import { useCollection, useFirestore } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
 
 function StatCard({ title, icon, count, isLoading }: { title: string, icon: React.ReactNode, count: number, isLoading: boolean }) {
@@ -29,16 +29,23 @@ function StatCard({ title, icon, count, isLoading }: { title: string, icon: Reac
 export default function AdminDashboardPage() {
     const firestore = useFirestore();
 
-    const { data: products, isLoading: isLoadingProducts } = useCollection(
-        firestore ? query(collection(firestore, 'products')) : null
+    const productsQuery = useMemoFirebase(
+      () => (firestore ? query(collection(firestore, "products")) : null),
+      [firestore]
     );
-    const { data: users, isLoading: isLoadingUsers } = useCollection(
-        firestore ? query(collection(firestore, 'users')) : null
+    const { data: products, isLoading: isLoadingProducts } = useCollection(productsQuery);
+
+    const usersQuery = useMemoFirebase(
+      () => (firestore ? query(collection(firestore, "users")) : null),
+      [firestore]
     );
-    
-    const { data: orders, isLoading: isLoadingOrders } = useCollection(
-        firestore ? query(collection(firestore, 'users/pXoTol5xMwMPe8nxAXat5Ozpuxt1/orders')) : null
+    const { data: users, isLoading: isLoadingUsers } = useCollection(usersQuery);
+
+    const ordersQuery = useMemoFirebase(
+        () => (firestore ? query(collection(firestore, 'users/pXoTol5xMwMPe8nxAXat5Ozpuxt1/orders')) : null),
+        [firestore]
     );
+    const { data: orders, isLoading: isLoadingOrders } = useCollection(ordersQuery);
 
 
     return (
