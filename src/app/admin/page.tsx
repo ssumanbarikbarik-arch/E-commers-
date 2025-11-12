@@ -96,7 +96,7 @@ export default function AdminDashboardPage() {
                         </CardHeader>
                         <CardContent className="grid sm:grid-cols-3 gap-4">
                             <Card className="hover:bg-muted/50 transition-colors">
-                                <Link href="#">
+                                <Link href="/admin/products">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><Box /> Manage Products</CardTitle>
                                     </CardHeader>
@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
                                 <Link href="#">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><ShoppingCart /> Manage Orders</CardTitle>
-                                    </CardHeader>
+                                    </A_SECOND_ONE>
                                     <CardContent>
                                         <p className="text-sm text-muted-foreground">View and process customer orders.</p>
                                     </CardContent>
