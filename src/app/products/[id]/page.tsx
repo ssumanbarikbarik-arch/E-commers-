@@ -35,8 +35,10 @@ export default function ProductPage(props: ProductPageProps) {
   const [quantity, setQuantity] = React.useState(1);
   const [activeImage, setActiveImage] = React.useState(0);
 
+  const hasImages = product && product.images && product.images.length > 0;
+
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product || !hasImages) return;
     addItem({
         id: product.id,
         name: product.name,
@@ -92,26 +94,32 @@ export default function ProductPage(props: ProductPageProps) {
       <div className="grid md:grid-cols-2 gap-12 items-start">
         <div className="flex flex-col gap-4">
             <div className="relative aspect-square w-full overflow-hidden rounded-lg shadow-lg">
-                <Image
-                    src={product.images[activeImage].url}
-                    alt={product.images[activeImage].alt}
-                    fill
-                    className="object-cover"
-                    priority
-                />
+                {hasImages ? (
+                    <Image
+                        src={product.images[activeImage].url}
+                        alt={product.images[activeImage].alt}
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                ) : (
+                    <Skeleton className="h-full w-full" />
+                )}
             </div>
-            <div className="grid grid-cols-4 gap-4">
-                {product.images.map((image: any, index: number) => (
-                    <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
-                         <Image
-                            src={image.url}
-                            alt={image.alt}
-                            fill
-                            className="object-cover"
-                        />
-                    </button>
-                ))}
-            </div>
+            {hasImages && (
+                <div className="grid grid-cols-4 gap-4">
+                    {product.images.map((image: any, index: number) => (
+                        <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
+                            <Image
+                                src={image.url}
+                                alt={image.alt}
+                                fill
+                                className="object-cover"
+                            />
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
 
         <div className="flex flex-col gap-6">
@@ -146,7 +154,7 @@ export default function ProductPage(props: ProductPageProps) {
                 <Input type="number" value={quantity} readOnly className="h-10 w-16 text-center" />
                 <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => setQuantity(q => q+1)}><Plus className="h-4 w-4"/></Button>
             </div>
-            <Button size="lg" className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleAddToCart}>
+            <Button size="lg" className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleAddToCart} disabled={!hasImages}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart
             </Button>
