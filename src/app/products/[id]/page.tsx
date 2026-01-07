@@ -10,7 +10,7 @@ import { useCart } from "@/hooks/use-cart";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { useDoc, useFirestore } from "@/firebase";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -21,8 +21,12 @@ type ProductPageProps = {
 };
 
 export default function ProductPage({ params }: ProductPageProps) {
+  const { id } = params;
   const firestore = useFirestore();
-  const productRef = firestore ? doc(firestore, 'products', params.id) : null;
+  const productRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'products', id) : null),
+    [firestore, id]
+  );
   const { data: product, isLoading } = useDoc(productRef);
   
   const { addItem } = useCart();
