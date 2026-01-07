@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -106,9 +107,6 @@ export function Header() {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open cart">
                   <ShoppingCart className="h-5 w-5" />
-                  {cartItemCount > 0 && (
-                     <Badge variant="destructive" className="absolute -right-2 -top-2 h-6 w-6 rounded-full justify-center p-0">{cartItemCount}</Badge>
-                  )}
                 </Button>
               </SheetTrigger>
               <CartSheet />
