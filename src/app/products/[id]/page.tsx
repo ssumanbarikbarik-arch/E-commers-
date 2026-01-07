@@ -23,9 +23,8 @@ type ProductPageProps = {
   };
 };
 
-export default function ProductPage(props: ProductPageProps) {
-  const params = React.use(props.params);
-  const id = params.id;
+export default function ProductPage({ params }: ProductPageProps) {
+  const { id } = params;
   
   const firestore = useFirestore();
   const productRef = useMemoFirebase(
@@ -40,7 +39,7 @@ export default function ProductPage(props: ProductPageProps) {
   const [selectedSize, setSelectedSize] = React.useState<string | undefined>();
   const [activeImage, setActiveImage] = React.useState(0);
 
-  const hasImages = product && product.images && product.images.length > 0;
+  const hasImages = product && product.images && product.images.length > 0 && product.images[0].url;
   const hasSizes = product && product.availableSizes && product.availableSizes.length > 0;
 
   const handleAddToCart = () => {
@@ -120,7 +119,7 @@ export default function ProductPage(props: ProductPageProps) {
                     <Skeleton className="h-full w-full" />
                 )}
             </div>
-            {hasImages && (
+            {hasImages && product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-4">
                     {product.images.map((image: any, index: number) => (
                         <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
