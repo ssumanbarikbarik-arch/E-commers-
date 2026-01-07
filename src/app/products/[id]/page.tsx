@@ -1,6 +1,6 @@
+
 "use client"
 
-import { products } from "@/lib/placeholder-data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,9 @@ import { useCart } from "@/hooks/use-cart";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { useDoc, useFirestore } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ProductPageProps = {
   params: {
@@ -18,16 +21,16 @@ type ProductPageProps = {
 };
 
 export default function ProductPage({ params }: ProductPageProps) {
-  const product = products.find((p) => p.id === params.id);
+  const firestore = useFirestore();
+  const productRef = firestore ? doc(firestore, 'products', params.id) : null;
+  const { data: product, isLoading } = useDoc(productRef);
+  
   const { addItem } = useCart();
   const [quantity, setQuantity] = React.useState(1);
   const [activeImage, setActiveImage] = React.useState(0);
 
-  if (!product) {
-    notFound();
-  }
-  
   const handleAddToCart = () => {
+    if (!product) return;
     addItem({
         id: product.id,
         name: product.name,
@@ -38,6 +41,45 @@ export default function ProductPage({ params }: ProductPageProps) {
     });
     setQuantity(1);
   };
+
+  if (isLoading) {
+    return (
+        <div className="container mx-auto px-4 py-12">
+            <div className="grid md:grid-cols-2 gap-12 items-start">
+                <div className="flex flex-col gap-4">
+                    <Skeleton className="aspect-square w-full rounded-lg" />
+                    <div className="grid grid-cols-4 gap-4">
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                        <Skeleton className="aspect-square w-full rounded-md" />
+                    </div>
+                </div>
+                <div className="flex flex-col gap-6">
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-12 w-3/4" />
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-8 w-1/3" />
+                    <Separator />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                    </div>
+                    <Skeleton className="h-24 w-full" />
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="h-10 w-32" />
+                        <Skeleton className="h-12 flex-1" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+  }
+
+  if (!product) {
+    notFound();
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -54,8 +96,8 @@ export default function ProductPage({ params }: ProductPageProps) {
                 />
             </div>
             <div className="grid grid-cols-4 gap-4">
-                {product.images.map((image, index) => (
-                    <button key={image.id} onClick={() => setActiveImage(index)} className={`relative aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
+                {product.images.map((image: any, index: number) => (
+                    <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
                          <Image
                             src={image.url}
                             alt={image.alt}
@@ -89,7 +131,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             <CardContent className="p-4">
                 <h3 className="font-semibold mb-2">Specifications</h3>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1 text-sm">
-                    {product.specs.map(spec => <li key={spec}>{spec}</li>)}
+                    {product.specs.map((spec: string) => <li key={spec}>{spec}</li>)}
                 </ul>
             </CardContent>
           </Card>

@@ -1,13 +1,23 @@
+
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { products } from '@/lib/placeholder-data';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product-card';
 import { StyleRecommender } from '@/components/style-recommender';
 import { ArrowRight } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, limit, query } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  const featuredProducts = products.slice(0, 4);
+  const firestore = useFirestore();
+  const productsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), limit(4)) : null),
+    [firestore]
+  );
+  const { data: featuredProducts, isLoading } = useCollection(productsQuery);
 
   return (
     <div className="flex flex-col">
@@ -42,7 +52,15 @@ export default function Home() {
             Featured Products
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {featuredProducts.map((product) => (
+            {isLoading &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-64 w-full" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-6 w-1/4" />
+                </div>
+              ))}
+            {featuredProducts?.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
