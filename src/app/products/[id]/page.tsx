@@ -13,6 +13,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 type ProductPageProps = {
   params: {
@@ -32,13 +35,24 @@ export default function ProductPage(props: ProductPageProps) {
   const { data: product, isLoading } = useDoc(productRef);
   
   const { addItem } = useCart();
+  const { toast } = useToast();
   const [quantity, setQuantity] = React.useState(1);
+  const [selectedSize, setSelectedSize] = React.useState<string | undefined>();
   const [activeImage, setActiveImage] = React.useState(0);
 
   const hasImages = product && product.images && product.images.length > 0;
+  const hasSizes = product && product.availableSizes && product.availableSizes.length > 0;
 
   const handleAddToCart = () => {
     if (!product || !hasImages) return;
+    if (hasSizes && !selectedSize) {
+        toast({
+            variant: "destructive",
+            title: "Please select a size",
+            description: "You must choose a size before adding to the cart.",
+        });
+        return;
+    }
     addItem({
         id: product.id,
         name: product.name,
@@ -139,6 +153,22 @@ export default function ProductPage(props: ProductPageProps) {
           <Separator/>
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           
+           {hasSizes && (
+            <div className="space-y-2">
+                <Label htmlFor="size">Size</Label>
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                    <SelectTrigger id="size">
+                        <SelectValue placeholder="Select a size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {product.availableSizes.map((size: string) => (
+                            <SelectItem key={size} value={size}>{size}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+          )}
+
           <Card>
             <CardContent className="p-4">
                 <h3 className="font-semibold mb-2">Specifications</h3>
