@@ -20,7 +20,10 @@ type ProductPageProps = {
   };
 };
 
-export default function ProductPage({ params: { id } }: ProductPageProps) {
+export default function ProductPage(props: ProductPageProps) {
+  const params = React.use(props.params);
+  const id = params.id;
+  
   const firestore = useFirestore();
   const productRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'products', id) : null),
