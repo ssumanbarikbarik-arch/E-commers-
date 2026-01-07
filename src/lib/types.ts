@@ -11,6 +11,7 @@ export type Product = {
     hint: string;
   }[];
   specs: string[];
+  availableSizes: string[];
   rating: number;
   reviewCount: number;
 };

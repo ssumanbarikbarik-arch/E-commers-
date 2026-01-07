@@ -31,7 +31,6 @@ import { Separator } from '../ui/separator';
 
 const imageSchema = z.object({
   url: z.string().url('Please enter a valid URL'),
-  alt: z.string().optional(),
   hint: z.string().optional(),
 });
 
@@ -41,6 +40,7 @@ const formSchema = z.object({
   price: z.coerce.number().min(0.01, 'Price must be positive'),
   description: z.string().min(10, 'Description is too short'),
   specs: z.array(z.object({ value: z.string() })).min(1, 'Add at least one spec'),
+  availableSizes: z.array(z.object({ value: z.string() })).min(1, 'Add at least one size'),
   images: z.array(imageSchema).min(1, 'Please add at least one image.'),
 });
 
@@ -61,7 +61,8 @@ export function ProductForm({ product }: ProductFormProps) {
       ? {
           ...product,
           specs: product.specs.map((spec: any) => ({ value: typeof spec === 'string' ? spec : spec.value })),
-          images: product.images || [{ url: '', alt: '', hint: '' }],
+          availableSizes: product.availableSizes?.map((size: any) => ({ value: typeof size === 'string' ? size : size.value })) || [{ value: '' }],
+          images: product.images || [{ url: '', hint: '' }],
         }
       : {
           name: '',
@@ -69,13 +70,19 @@ export function ProductForm({ product }: ProductFormProps) {
           price: 0,
           description: '',
           specs: [{ value: '' }],
-          images: [{ url: '', alt: '', hint: '' }],
+          availableSizes: [{ value: '' }],
+          images: [{ url: '', hint: '' }],
         },
   });
 
   const { fields: specFields, append: appendSpec, remove: removeSpec } = useFieldArray({
     control: form.control,
     name: 'specs',
+  });
+
+  const { fields: sizeFields, append: appendSize, remove: removeSize } = useFieldArray({
+    control: form.control,
+    name: 'availableSizes',
   });
 
   const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
@@ -89,10 +96,11 @@ export function ProductForm({ product }: ProductFormProps) {
     const productData = {
         ...data,
         specs: data.specs.map(s => s.value),
+        availableSizes: data.availableSizes.map(s => s.value),
         images: data.images.map((image, index) => ({
             id: `${index + 1}`,
             url: image.url,
-            alt: image.alt || data.name,
+            alt: data.name,
             hint: image.hint || 'product photo',
         })),
         rating: product?.rating || Math.random() * 2 + 3,
@@ -104,7 +112,8 @@ export function ProductForm({ product }: ProductFormProps) {
         await setDoc(doc(firestore, 'products', product.id), productData);
         toast({ title: 'Product updated successfully' });
       } else {
-        await addDoc(collection(firestore, 'products'), productData);
+        const newProdRef = doc(collection(firestore, 'products'));
+        await setDoc(newProdRef, { ...productData, id: newProdRef.id });
         toast({ title: 'Product created successfully' });
       }
       router.push('/admin/products');
@@ -214,6 +223,38 @@ export function ProductForm({ product }: ProductFormProps) {
                         </Button>
                     </div>
 
+                     <div>
+                        <FormLabel>Available Sizes</FormLabel>
+                        {sizeFields.map((field, index) => (
+                            <div key={field.id} className="flex items-center gap-2 mt-2">
+                            <FormField
+                                control={form.control}
+                                name={`availableSizes.${index}.value`}
+                                render={({ field }) => (
+                                <FormItem className="flex-1">
+                                    <FormControl>
+                                    <Input placeholder={`e.g., S, M, L...`} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <Button type="button" variant="destructive" size="icon" onClick={() => removeSize(index)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                            </div>
+                        ))}
+                         <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => appendSize({ value: "" })}
+                        >
+                            Add Size
+                        </Button>
+                    </div>
+
                     <Separator />
 
                     <div className="space-y-4">
@@ -234,6 +275,19 @@ export function ProductForm({ product }: ProductFormProps) {
                                         </FormItem>
                                         )}
                                     />
+                                    <FormField
+                                        control={form.control}
+                                        name={`images.${index}.hint`}
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Image Hint</FormLabel>
+                                            <FormControl>
+                                            <Input placeholder="A few keywords for AI" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
                                 </div>
                                 <Button type="button" variant="destructive" size="sm" className="mt-4" onClick={() => removeImage(index)}>
                                     <Trash2 className="mr-2 h-4 w-4" /> Remove Image
@@ -243,7 +297,7 @@ export function ProductForm({ product }: ProductFormProps) {
                          <Button
                             type="button"
                             variant="outline"
-                            onClick={() => appendImage({ url: "", alt: "" })}
+                            onClick={() => appendImage({ url: "", hint: "" })}
                         >
                             <PlusCircle className="mr-2" /> Add Image
                         </Button>
