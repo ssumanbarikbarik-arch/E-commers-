@@ -141,10 +141,10 @@ export default function ProductPage() {
             <div className="flex items-center gap-2">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`h-5 w-5 ${i < Math.round(product.rating) ? 'text-accent fill-accent' : 'text-gray-300'}`}/>
+                  <Star key={i} className={`h-5 w-5 ${product.rating && i < Math.round(product.rating) ? 'text-accent fill-accent' : 'text-gray-300'}`}/>
                 ))}
               </div>
-              <span className="text-muted-foreground text-sm">{product.rating.toFixed(1)} ({product.reviewCount} reviews)</span>
+              <span className="text-muted-foreground text-sm">{product.rating?.toFixed(1)} ({product.reviewCount} reviews)</span>
             </div>
           </div>
           <p className="text-3xl font-semibold">${product.price.toFixed(2)}</p>
@@ -167,14 +167,16 @@ export default function ProductPage() {
             </div>
           )}
 
-          <Card>
-            <CardContent className="p-4">
-                <h3 className="font-semibold mb-2">Specifications</h3>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1 text-sm">
-                    {product.specs.map((spec: string) => <li key={spec}>{spec}</li>)}
-                </ul>
-            </CardContent>
-          </Card>
+          {product.specs && product.specs.length > 0 && (
+            <Card>
+              <CardContent className="p-4">
+                  <h3 className="font-semibold mb-2">Specifications</h3>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-1 text-sm">
+                      {product.specs.map((spec: string) => <li key={spec}>{spec}</li>)}
+                  </ul>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
