@@ -45,33 +45,37 @@ export default function AdminDashboardPage() {
     const { data: users, isLoading: isLoadingUsers } = useCollection(usersQuery);
 
     useEffect(() => {
-        if (users && firestore && !isLoadingUsers) {
-            setIsLoadingOrders(true);
-            
-            const fetchAllOrders = async () => {
-                const orderPromises = users.map(user => {
-                    const ordersRef = collection(firestore, 'users', user.id, 'orders');
-                    return getDocs(query(ordersRef));
-                });
-
-                try {
-                    const userOrdersSnapshots = await Promise.all(orderPromises);
-                    const total = userOrdersSnapshots.reduce((acc, snapshot) => acc + snapshot.size, 0);
-                    setTotalOrders(total);
-                } catch (error) {
-                    console.error("Error fetching orders:", error);
-                    setTotalOrders(0);
-                } finally {
-                    setIsLoadingOrders(false);
-                }
-            };
-
-            fetchAllOrders();
-        } else if (!isLoadingUsers) {
-            // Handle case where there are no users
-            setIsLoadingOrders(false);
-            setTotalOrders(0);
+        if (!users || isLoadingUsers || !firestore) {
+            return;
         }
+
+        setIsLoadingOrders(true);
+        
+        const fetchAllOrders = async () => {
+            if (users.length === 0) {
+                setTotalOrders(0);
+                setIsLoadingOrders(false);
+                return;
+            }
+
+            const orderPromises = users.map(user => {
+                const ordersRef = collection(firestore, 'users', user.id, 'orders');
+                return getDocs(query(ordersRef));
+            });
+
+            try {
+                const userOrdersSnapshots = await Promise.all(orderPromises);
+                const total = userOrdersSnapshots.reduce((acc, snapshot) => acc + snapshot.size, 0);
+                setTotalOrders(total);
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+                setTotalOrders(0);
+            } finally {
+                setIsLoadingOrders(false);
+            }
+        };
+
+        fetchAllOrders();
     }, [users, firestore, isLoadingUsers]);
 
 
@@ -129,6 +133,31 @@ export default function AdminDashboardPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-sm text-muted-foreground">View and manage customer accounts.</p>
+                                    </CardContent>
+                                </Link>
+                            </Card>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Bot /> AI Tools</CardTitle>
+                            <CardDescription>Leverage AI to enhance your store.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Card className="hover:bg-muted/50 transition-colors">
+                                <Link href="/admin/generate-description">
+                                    <CardHeader>
+                                        <CardTitle className="text-xl">Product Description Generator</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="flex items-center justify-between">
+                                       <div>
+                                            <p className="text-sm text-muted-foreground">Automatically generate compelling product descriptions.</p>
+                                       </div>
+                                       <div className="flex items-center gap-2 text-sm text-primary">
+                                            <span>Go to Generator</span>
+                                            <ArrowRight />
+                                       </div>
                                     </CardContent>
                                 </Link>
                             </Card>
