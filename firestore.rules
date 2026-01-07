@@ -16,7 +16,7 @@
  * Key Security Decisions:
  * - Users can only access their own data.
  * - The product catalog is publicly readable.
- * - An admin user (defined by UID) has special privileges for content management.
+ * - An admin user (defined by email) has special privileges for content management.
  * - Data validation is limited to ownership checks and relational integrity.
  *
  * Denormalization for Authorization:
@@ -51,7 +51,7 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations, with admin override for listing.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if request.auth.uid == userId;
       allow update: if isExistingOwner(userId);
@@ -190,9 +190,8 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // For now, we will use a specific UID as the admin.
       // In a real app, you might use custom claims or a roles collection.
-      return request.auth.uid == "pXoTol5xMwMPe8nxAXat5Ozpuxt1";
+      return request.auth.token.email == "rraghabbarik@gmail.com";
     }
 
     function parentPathSegment() {
