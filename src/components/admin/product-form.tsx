@@ -197,9 +197,14 @@ export function ProductForm({ product }: ProductFormProps) {
                         </Button>
                     </div>
 
-                    <Button type="submit">
-                        {product ? 'Update Product' : 'Create Product'}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button type="submit">
+                            {product ? 'Update Product' : 'Create Product'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => router.back()}>
+                            Cancel
+                        </Button>
+                    </div>
                     </form>
                 </Form>
                 </CardContent>
