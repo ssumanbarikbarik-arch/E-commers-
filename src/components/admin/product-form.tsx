@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -25,7 +26,14 @@ import { useFirestore } from '@/firebase';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Trash2 } from 'lucide-react';
+import { Trash2, PlusCircle } from 'lucide-react';
+import { Separator } from '../ui/separator';
+
+const imageSchema = z.object({
+  url: z.string().url('Please enter a valid URL'),
+  alt: z.string().min(1, 'Alt text is required'),
+  hint: z.string().optional(),
+});
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name is too short'),
@@ -33,6 +41,7 @@ const formSchema = z.object({
   price: z.coerce.number().min(0.01, 'Price must be positive'),
   description: z.string().min(10, 'Description is too short'),
   specs: z.array(z.object({ value: z.string() })).min(1, 'Add at least one spec'),
+  images: z.array(imageSchema).min(1, 'Please add at least one image.'),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -52,6 +61,7 @@ export function ProductForm({ product }: ProductFormProps) {
       ? {
           ...product,
           specs: product.specs.map((spec: any) => ({ value: typeof spec === 'string' ? spec : spec.value })),
+          images: product.images || [{ url: '', alt: '', hint: '' }],
         }
       : {
           name: '',
@@ -59,12 +69,18 @@ export function ProductForm({ product }: ProductFormProps) {
           price: 0,
           description: '',
           specs: [{ value: '' }],
+          images: [{ url: '', alt: '', hint: '' }],
         },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: specFields, append: appendSpec, remove: removeSpec } = useFieldArray({
     control: form.control,
     name: 'specs',
+  });
+
+  const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
+    control: form.control,
+    name: 'images',
   });
 
   async function onSubmit(data: ProductFormValues) {
@@ -73,13 +89,14 @@ export function ProductForm({ product }: ProductFormProps) {
     const productData = {
         ...data,
         specs: data.specs.map(s => s.value),
-        // These are placeholders, you might want to add form fields for them
-        rating: product?.rating || Math.random() * 2 + 3, // Random rating between 3 and 5
+        images: data.images.map((image, index) => ({
+            id: `${index + 1}`,
+            url: image.url,
+            alt: image.alt,
+            hint: image.hint || 'product photo',
+        })),
+        rating: product?.rating || Math.random() * 2 + 3,
         reviewCount: product?.reviewCount || Math.floor(Math.random() * 200),
-        images: product?.images || [
-            { id: '1', url: `https://picsum.photos/seed/${Math.random()}/800/800`, alt: data.name, hint: 'product photo' },
-            { id: '2', url: `https://picsum.photos/seed/${Math.random()}/800/800`, alt: data.name, hint: 'product detail' },
-        ]
     };
 
     try {
@@ -167,7 +184,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
                     <div>
                         <FormLabel>Specifications</FormLabel>
-                        {fields.map((field, index) => (
+                        {specFields.map((field, index) => (
                             <div key={field.id} className="flex items-center gap-2 mt-2">
                             <FormField
                                 control={form.control}
@@ -181,7 +198,7 @@ export function ProductForm({ product }: ProductFormProps) {
                                 </FormItem>
                                 )}
                             />
-                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                            <Button type="button" variant="destructive" size="icon" onClick={() => removeSpec(index)}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                             </div>
@@ -191,9 +208,57 @@ export function ProductForm({ product }: ProductFormProps) {
                             variant="outline"
                             size="sm"
                             className="mt-2"
-                            onClick={() => append({ value: "" })}
+                            onClick={() => appendSpec({ value: "" })}
                         >
                             Add Specification
+                        </Button>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-4">
+                        <FormLabel>Product Images</FormLabel>
+                        {imageFields.map((field, index) => (
+                            <Card key={field.id} className="p-4 bg-muted/50">
+                                <div className="space-y-2">
+                                     <FormField
+                                        control={form.control}
+                                        name={`images.${index}.url`}
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Image URL</FormLabel>
+                                            <FormControl>
+                                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                     <FormField
+                                        control={form.control}
+                                        name={`images.${index}.alt`}
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Alt Text</FormLabel>
+                                            <FormControl>
+                                            <Input placeholder="A brief description of the image" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <Button type="button" variant="destructive" size="sm" className="mt-4" onClick={() => removeImage(index)}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> Remove Image
+                                </Button>
+                            </Card>
+                        ))}
+                         <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => appendImage({ url: "", alt: "", hint: "" })}
+                        >
+                            <PlusCircle className="mr-2" /> Add Image
                         </Button>
                     </div>
 
