@@ -98,26 +98,6 @@ export default function AdminDashboardPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Bot /> AI-Powered Tools</CardTitle>
-                            <CardDescription>Use generative AI to help manage your store.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex justify-between items-center p-4 border rounded-lg">
-                                <div>
-                                    <h3 className="font-semibold">Product Description Generator</h3>
-                                    <p className="text-sm text-muted-foreground">Automatically generate compelling product descriptions.</p>
-                                </div>
-                                <Button asChild variant="outline">
-                                    <Link href="/admin/generate-description">
-                                        Go to Generator <ArrowRight className="ml-2" />
-                                    </Link>
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Box /> Content Management</CardTitle>
                             <CardDescription>Manage your store's products, orders, and users.</CardDescription>
                         </CardHeader>
