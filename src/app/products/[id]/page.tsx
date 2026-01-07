@@ -1,7 +1,7 @@
 
 "use client"
 
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Star, ShoppingCart, Minus, Plus } from "lucide-react";
@@ -17,18 +17,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-type ProductPageProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default function ProductPage({ params }: ProductPageProps) {
-  const { id } = params;
+export default function ProductPage() {
+  const params = useParams();
+  const id = typeof params.id === 'string' ? params.id : '';
   
   const firestore = useFirestore();
   const productRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'products', id) : null),
+    () => (firestore && id ? doc(firestore, 'products', id) : null),
     [firestore, id]
   );
   const { data: product, isLoading } = useDoc(productRef);
@@ -98,8 +93,12 @@ export default function ProductPage({ params }: ProductPageProps) {
     )
   }
 
-  if (!product) {
+  if (!product && !isLoading) {
     notFound();
+  }
+  
+  if (!product) {
+      return null;
   }
 
   return (
