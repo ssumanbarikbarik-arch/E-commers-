@@ -14,8 +14,8 @@ import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function ProductPage() {
   const params = useParams();
@@ -32,21 +32,31 @@ export default function ProductPage() {
   const { toast } = useToast();
   const [quantity, setQuantity] = React.useState(1);
   const [selectedSize, setSelectedSize] = React.useState<string | undefined>();
+  const [selectedColor, setSelectedColor] = React.useState<string | undefined>();
   const [activeImage, setActiveImage] = React.useState(0);
 
   const hasImages = product && product.images && product.images.length > 0 && product.images[0].url;
   const hasSizes = product && product.availableSizes && product.availableSizes.length > 0;
+  const hasColors = product && product.colors && product.colors.length > 0;
 
   const handleAddToCart = () => {
     if (!product || !hasImages) return;
+    
+    if (hasColors && !selectedColor) {
+        toast({
+            variant: "destructive",
+            title: "Please select a color",
+        });
+        return;
+    }
     if (hasSizes && !selectedSize) {
         toast({
             variant: "destructive",
             title: "Please select a size",
-            description: "You must choose a size before adding to the cart.",
         });
         return;
     }
+
     addItem({
         id: product.id,
         name: product.name,
@@ -151,19 +161,41 @@ export default function ProductPage() {
           <Separator/>
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           
+          {hasColors && (
+            <div className="space-y-3">
+                <Label htmlFor="color">Color</Label>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color: string) => (
+                    <Button 
+                      key={color} 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedColor(color)}
+                      className={cn(selectedColor === color && "ring-2 ring-primary ring-offset-2")}
+                    >
+                      {color}
+                    </Button>
+                  ))}
+                </div>
+            </div>
+          )}
+
            {hasSizes && (
-            <div className="space-y-2">
+            <div className="space-y-3">
                 <Label htmlFor="size">Size</Label>
-                <Select value={selectedSize} onValueChange={setSelectedSize}>
-                    <SelectTrigger id="size">
-                        <SelectValue placeholder="Select a size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {product.availableSizes.map((size: string) => (
-                            <SelectItem key={size} value={size}>{size}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <div className="flex flex-wrap gap-2">
+                  {product.availableSizes.map((size: string) => (
+                    <Button
+                      key={size}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedSize(size)}
+                      className={cn("w-12", selectedSize === size && "ring-2 ring-primary ring-offset-2")}
+                    >
+                      {size}
+                    </Button>
+                  ))}
+                </div>
             </div>
           )}
 
@@ -194,3 +226,5 @@ export default function ProductPage() {
     </div>
   );
 }
+
+    

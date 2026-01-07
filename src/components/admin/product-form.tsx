@@ -40,13 +40,14 @@ const formSchema = z.object({
   description: z.string().min(10, 'Description is too short'),
   specs: z.array(z.object({ value: z.string() })).min(1, 'Add at least one spec'),
   availableSizes: z.array(z.object({ value: z.string() })).min(1, 'Add at least one size'),
+  colors: z.array(z.object({ value: z.string() })).min(1, 'Add at least one color'),
   images: z.array(imageSchema).min(1, 'Please add at least one image.'),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
 
 interface ProductFormProps {
-  product?: ProductFormValues & { id: string, images: {url: string, alt: string}[] };
+  product?: ProductFormValues & { id: string, images: {url: string, alt: string}[], colors: string[] };
 }
 
 export function ProductForm({ product }: ProductFormProps) {
@@ -61,6 +62,7 @@ export function ProductForm({ product }: ProductFormProps) {
           ...product,
           specs: product.specs.map((spec: any) => ({ value: typeof spec === 'string' ? spec : spec.value })),
           availableSizes: product.availableSizes?.map((size: any) => ({ value: typeof size === 'string' ? size : size.value })) || [{ value: '' }],
+          colors: product.colors?.map((color: any) => ({ value: typeof color === 'string' ? color : color.value })) || [{ value: '' }],
           images: product.images || [{ url: '' }],
         }
       : {
@@ -70,6 +72,7 @@ export function ProductForm({ product }: ProductFormProps) {
           description: '',
           specs: [{ value: '' }],
           availableSizes: [{ value: '' }],
+          colors: [{ value: '' }],
           images: [{ url: '' }],
         },
   });
@@ -84,6 +87,11 @@ export function ProductForm({ product }: ProductFormProps) {
     name: 'availableSizes',
   });
 
+  const { fields: colorFields, append: appendColor, remove: removeColor } = useFieldArray({
+    control: form.control,
+    name: 'colors',
+  });
+
   const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
     control: form.control,
     name: 'images',
@@ -96,6 +104,7 @@ export function ProductForm({ product }: ProductFormProps) {
         ...data,
         specs: data.specs.map(s => s.value),
         availableSizes: data.availableSizes.map(s => s.value),
+        colors: data.colors.map(c => c.value),
         images: data.images.map((image, index) => ({
             id: `${index + 1}`,
             url: image.url,
@@ -253,6 +262,39 @@ export function ProductForm({ product }: ProductFormProps) {
                         </Button>
                     </div>
 
+                     <div>
+                        <FormLabel>Available Colors</FormLabel>
+                        {colorFields.map((field, index) => (
+                            <div key={field.id} className="flex items-center gap-2 mt-2">
+                            <FormField
+                                control={form.control}
+                                name={`colors.${index}.value`}
+                                render={({ field }) => (
+                                <FormItem className="flex-1">
+                                    <FormControl>
+                                    <Input placeholder={`e.g., Blue, Black, White...`} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <Button type="button" variant="destructive" size="icon" onClick={() => removeColor(index)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                            </div>
+                        ))}
+                         <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => appendColor({ value: "" })}
+                        >
+                            Add Color
+                        </Button>
+                    </div>
+
+
                     <Separator />
 
                     <div className="space-y-4">
@@ -282,7 +324,7 @@ export function ProductForm({ product }: ProductFormProps) {
                          <Button
                             type="button"
                             variant="outline"
-                            onClick={() => appendImage({ url: "" })}
+                            onClick={() => appendImage({ url: '' })}
                         >
                             <PlusCircle className="mr-2" /> Add Image
                         </Button>
@@ -304,3 +346,5 @@ export function ProductForm({ product }: ProductFormProps) {
     </div>
   );
 }
+
+    

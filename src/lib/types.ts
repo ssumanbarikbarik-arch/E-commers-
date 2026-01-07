@@ -11,6 +11,7 @@ export type Product = {
   }[];
   specs: string[];
   availableSizes: string[];
+  colors: string[];
   rating: number;
   reviewCount: number;
 };
@@ -37,3 +38,5 @@ export type User = {
   name: string;
   email: string;
 };
+
+    
