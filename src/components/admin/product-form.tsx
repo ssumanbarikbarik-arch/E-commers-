@@ -31,7 +31,7 @@ import { Separator } from '../ui/separator';
 
 const imageSchema = z.object({
   url: z.string().url('Please enter a valid URL'),
-  alt: z.string().min(1, 'Alt text is required'),
+  alt: z.string().optional(),
   hint: z.string().optional(),
 });
 
@@ -92,7 +92,7 @@ export function ProductForm({ product }: ProductFormProps) {
         images: data.images.map((image, index) => ({
             id: `${index + 1}`,
             url: image.url,
-            alt: image.alt,
+            alt: image.alt || data.name,
             hint: image.hint || 'product photo',
         })),
         rating: product?.rating || Math.random() * 2 + 3,
@@ -234,19 +234,6 @@ export function ProductForm({ product }: ProductFormProps) {
                                         </FormItem>
                                         )}
                                     />
-                                     <FormField
-                                        control={form.control}
-                                        name={`images.${index}.alt`}
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Alt Text</FormLabel>
-                                            <FormControl>
-                                            <Input placeholder="A brief description of the image" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
                                 </div>
                                 <Button type="button" variant="destructive" size="sm" className="mt-4" onClick={() => removeImage(index)}>
                                     <Trash2 className="mr-2 h-4 w-4" /> Remove Image
@@ -256,7 +243,7 @@ export function ProductForm({ product }: ProductFormProps) {
                          <Button
                             type="button"
                             variant="outline"
-                            onClick={() => appendImage({ url: "", alt: "", hint: "" })}
+                            onClick={() => appendImage({ url: "", alt: "" })}
                         >
                             <PlusCircle className="mr-2" /> Add Image
                         </Button>
