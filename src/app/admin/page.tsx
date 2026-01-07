@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Bot, Box, ShoppingCart, Users } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 function StatCard({ title, icon, count, isLoading }: { title: string, icon: React.ReactNode, count: number, isLoading: boolean }) {
@@ -45,45 +45,34 @@ export default function AdminDashboardPage() {
     const { data: users, isLoading: isLoadingUsers } = useCollection(usersQuery);
 
     useEffect(() => {
-        if (users && firestore) {
+        if (users && firestore && !isLoadingUsers) {
             setIsLoadingOrders(true);
-            const fetchOrders = async () => {
-                let count = 0;
-                for (const user of users) {
-                    const ordersQuery = query(collection(firestore, `users/${user.id}/orders`));
-                    const { data: orders } = await new Promise<any>(resolve => {
-                        const { data, isLoading } = useCollection(ordersQuery);
-                        if (!isLoading) resolve({data, isLoading});
-                    });
-                     if(orders) {
-                        count += orders.length;
-                    }
+            
+            const fetchAllOrders = async () => {
+                const orderPromises = users.map(user => {
+                    const ordersRef = collection(firestore, 'users', user.id, 'orders');
+                    return getDocs(query(ordersRef));
+                });
+
+                try {
+                    const userOrdersSnapshots = await Promise.all(orderPromises);
+                    const total = userOrdersSnapshots.reduce((acc, snapshot) => acc + snapshot.size, 0);
+                    setTotalOrders(total);
+                } catch (error) {
+                    console.error("Error fetching orders:", error);
+                    setTotalOrders(0);
+                } finally {
+                    setIsLoadingOrders(false);
                 }
-                setTotalOrders(count);
-                setIsLoadingOrders(false);
             };
 
-            const promises = users.map(user => {
-                const ordersRef = collection(firestore, 'users', user.id, 'orders');
-                return new Promise(resolve => {
-                  const { data: orders, isLoading } = useCollection(query(ordersRef));
-                  const unwatch = setInterval(() => {
-                    if(!isLoading) {
-                      clearInterval(unwatch);
-                      resolve(orders || []);
-                    }
-                  }, 100);
-                });
-            });
-    
-            Promise.all(promises).then(results => {
-                const total = (results as any[][]).reduce((acc, orders) => acc + orders.length, 0);
-                setTotalOrders(total);
-                setIsLoadingOrders(false);
-            });
-
+            fetchAllOrders();
+        } else if (!isLoadingUsers) {
+            // Handle case where there are no users
+            setIsLoadingOrders(false);
+            setTotalOrders(0);
         }
-    }, [users, firestore]);
+    }, [users, firestore, isLoadingUsers]);
 
 
     return (
