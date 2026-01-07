@@ -31,7 +31,6 @@ import { Separator } from '../ui/separator';
 
 const imageSchema = z.object({
   url: z.string().url('Please enter a valid URL'),
-  hint: z.string().optional(),
 });
 
 const formSchema = z.object({
@@ -62,7 +61,7 @@ export function ProductForm({ product }: ProductFormProps) {
           ...product,
           specs: product.specs.map((spec: any) => ({ value: typeof spec === 'string' ? spec : spec.value })),
           availableSizes: product.availableSizes?.map((size: any) => ({ value: typeof size === 'string' ? size : size.value })) || [{ value: '' }],
-          images: product.images || [{ url: '', hint: '' }],
+          images: product.images || [{ url: '' }],
         }
       : {
           name: '',
@@ -71,7 +70,7 @@ export function ProductForm({ product }: ProductFormProps) {
           description: '',
           specs: [{ value: '' }],
           availableSizes: [{ value: '' }],
-          images: [{ url: '', hint: '' }],
+          images: [{ url: '' }],
         },
   });
 
@@ -101,7 +100,7 @@ export function ProductForm({ product }: ProductFormProps) {
             id: `${index + 1}`,
             url: image.url,
             alt: data.name,
-            hint: image.hint || 'product photo',
+            hint: 'product photo',
         })),
         rating: product?.rating || Math.random() * 2 + 3,
         reviewCount: product?.reviewCount || Math.floor(Math.random() * 200),
@@ -275,19 +274,6 @@ export function ProductForm({ product }: ProductFormProps) {
                                         </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={form.control}
-                                        name={`images.${index}.hint`}
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Image Hint</FormLabel>
-                                            <FormControl>
-                                            <Input placeholder="A few keywords for AI" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
                                 </div>
                                 <Button type="button" variant="destructive" size="sm" className="mt-4" onClick={() => removeImage(index)}>
                                     <Trash2 className="mr-2 h-4 w-4" /> Remove Image
@@ -297,7 +283,7 @@ export function ProductForm({ product }: ProductFormProps) {
                          <Button
                             type="button"
                             variant="outline"
-                            onClick={() => appendImage({ url: "", hint: "" })}
+                            onClick={() => appendImage({ url: "" })}
                         >
                             <PlusCircle className="mr-2" /> Add Image
                         </Button>
