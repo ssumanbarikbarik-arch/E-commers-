@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowRight, Bot, Box, ShoppingCart, Users } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 function StatCard({ title, icon, count, isLoading }: { title: string, icon: React.ReactNode, count: number, isLoading: boolean }) {
     return (
@@ -28,6 +29,8 @@ function StatCard({ title, icon, count, isLoading }: { title: string, icon: Reac
 
 export default function AdminDashboardPage() {
     const firestore = useFirestore();
+    const [totalOrders, setTotalOrders] = useState(0);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
 
     const productsQuery = useMemoFirebase(
       () => (firestore ? query(collection(firestore, "products")) : null),
@@ -41,11 +44,46 @@ export default function AdminDashboardPage() {
     );
     const { data: users, isLoading: isLoadingUsers } = useCollection(usersQuery);
 
-    const ordersQuery = useMemoFirebase(
-        () => (firestore ? query(collection(firestore, 'users/pXoTol5xMwMPe8nxAXat5Ozpuxt1/orders')) : null),
-        [firestore]
-    );
-    const { data: orders, isLoading: isLoadingOrders } = useCollection(ordersQuery);
+    useEffect(() => {
+        if (users && firestore) {
+            setIsLoadingOrders(true);
+            const fetchOrders = async () => {
+                let count = 0;
+                for (const user of users) {
+                    const ordersQuery = query(collection(firestore, `users/${user.id}/orders`));
+                    const { data: orders } = await new Promise<any>(resolve => {
+                        const { data, isLoading } = useCollection(ordersQuery);
+                        if (!isLoading) resolve({data, isLoading});
+                    });
+                     if(orders) {
+                        count += orders.length;
+                    }
+                }
+                setTotalOrders(count);
+                setIsLoadingOrders(false);
+            };
+
+            const promises = users.map(user => {
+                const ordersRef = collection(firestore, 'users', user.id, 'orders');
+                return new Promise(resolve => {
+                  const { data: orders, isLoading } = useCollection(query(ordersRef));
+                  const unwatch = setInterval(() => {
+                    if(!isLoading) {
+                      clearInterval(unwatch);
+                      resolve(orders || []);
+                    }
+                  }, 100);
+                });
+            });
+    
+            Promise.all(promises).then(results => {
+                const total = (results as any[][]).reduce((acc, orders) => acc + orders.length, 0);
+                setTotalOrders(total);
+                setIsLoadingOrders(false);
+            });
+
+        }
+    }, [users, firestore]);
 
 
     return (
@@ -64,7 +102,7 @@ export default function AdminDashboardPage() {
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <StatCard title="Total Products" icon={<Box className="h-4 w-4 text-muted-foreground"/>} count={products?.length ?? 0} isLoading={isLoadingProducts} />
-                        <StatCard title="Total Orders" icon={<ShoppingCart className="h-4 w-4 text-muted-foreground"/>} count={orders?.length ?? 0} isLoading={isLoadingOrders} />
+                        <StatCard title="Total Orders" icon={<ShoppingCart className="h-4 w-4 text-muted-foreground"/>} count={totalOrders} isLoading={isLoadingOrders} />
                         <StatCard title="Total Users" icon={<Users className="h-4 w-4 text-muted-foreground"/>} count={users?.length ?? 0} isLoading={isLoadingUsers} />
                         </CardContent>
                     </Card>
