@@ -8,7 +8,6 @@ export type Product = {
     id: string;
     url: string;
     alt: string;
-    hint: string;
   }[];
   specs: string[];
   availableSizes: string[];

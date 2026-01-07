@@ -97,7 +97,6 @@ export default function ProductPage(props: ProductPageProps) {
                     alt={product.images[activeImage].alt}
                     fill
                     className="object-cover"
-                    data-ai-hint={product.images[activeImage].hint}
                     priority
                 />
             </div>
@@ -109,7 +108,6 @@ export default function ProductPage(props: ProductPageProps) {
                             alt={image.alt}
                             fill
                             className="object-cover"
-                            data-ai-hint={image.hint}
                         />
                     </button>
                 ))}

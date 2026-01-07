@@ -36,7 +36,6 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={product.images[0].alt}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
-            data-ai-hint={product.images[0].hint}
           />
            <Button
             size="sm"

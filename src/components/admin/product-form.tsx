@@ -46,7 +46,7 @@ const formSchema = z.object({
 type ProductFormValues = z.infer<typeof formSchema>;
 
 interface ProductFormProps {
-  product?: ProductFormValues & { id: string };
+  product?: ProductFormValues & { id: string, images: {url: string, alt: string}[] };
 }
 
 export function ProductForm({ product }: ProductFormProps) {
@@ -100,7 +100,6 @@ export function ProductForm({ product }: ProductFormProps) {
             id: `${index + 1}`,
             url: image.url,
             alt: data.name,
-            hint: 'product photo',
         })),
         rating: product?.rating || Math.random() * 2 + 3,
         reviewCount: product?.reviewCount || Math.floor(Math.random() * 200),
