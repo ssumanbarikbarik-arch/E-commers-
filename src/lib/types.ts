@@ -28,7 +28,7 @@ export type CartItem = {
 export type Order = {
   id: string;
   date: string;
-  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Returned';
   total: number;
   items: CartItem[];
 };
@@ -39,4 +39,5 @@ export type User = {
   email: string;
 };
 
+    
     

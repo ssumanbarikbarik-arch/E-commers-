@@ -35,7 +35,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Ban, Undo2 } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +46,24 @@ import { format, parseISO, startOfWeek, startOfMonth, subDays } from 'date-fns';
 
 
 type EnrichedOrder = Order & { userId: string; userName: string };
+
+function StatCard({ title, icon, count, isLoading }: { title: string, icon: React.ReactNode, count: number, isLoading: boolean }) {
+    return (
+        <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                {icon}
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                    <div className="h-7 w-12 bg-muted animate-pulse rounded-md" />
+                ) : (
+                    <div className="text-2xl font-bold">{count}</div>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
 
 export default function ManageOrdersPage() {
   const firestore = useFirestore();
@@ -151,6 +169,15 @@ export default function ManageOrdersPage() {
     return data;
 }, [orders, timeRange]);
 
+  const cancelledOrdersCount = useMemo(() => {
+    return orders.filter(order => order.status === 'Cancelled').length;
+  }, [orders]);
+
+  const returnedOrdersCount = useMemo(() => {
+    return orders.filter(order => order.status === 'Returned').length;
+  }, [orders]);
+
+
   const handleStatusChange = async (
     orderId: string,
     userId: string,
@@ -185,6 +212,7 @@ export default function ManageOrdersPage() {
             case 'Processing': return 'secondary';
             case 'Delivered': return 'outline';
             case 'Cancelled': return 'destructive';
+            case 'Returned': return 'destructive';
             default: return 'secondary';
         }
     }
@@ -248,6 +276,7 @@ export default function ManageOrdersPage() {
                                 <SelectItem value="Shipped">Shipped</SelectItem>
                                 <SelectItem value="Delivered">Delivered</SelectItem>
                                 <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                <SelectItem value="Returned">Returned</SelectItem>
                             </SelectContent>
                             </Select>
                         </TableCell>
@@ -259,7 +288,11 @@ export default function ManageOrdersPage() {
             </CardContent>
             </Card>
         </div>
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-8">
+            <div className="grid grid-cols-2 gap-4">
+                <StatCard title="Cancelled Orders" icon={<Ban className="h-4 w-4 text-muted-foreground" />} count={cancelledOrdersCount} isLoading={isLoading} />
+                <StatCard title="Returned Orders" icon={<Undo2 className="h-4 w-4 text-muted-foreground" />} count={returnedOrdersCount} isLoading={isLoading} />
+            </div>
             <Card>
             <CardHeader>
                 <CardTitle>Order Analytics</CardTitle>
@@ -297,3 +330,5 @@ export default function ManageOrdersPage() {
     </div>
   );
 }
+
+    
