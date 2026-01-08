@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,7 +118,7 @@ export default function AdminDashboardPage() {
                                 </Link>
                             </Card>
                             <Card className="hover:bg-muted/50 transition-colors">
-                                <Link href="#">
+                                <Link href="/admin/orders">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><ShoppingCart /> Manage Orders</CardTitle>
                                     </CardHeader>
