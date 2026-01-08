@@ -191,99 +191,108 @@ export default function ManageOrdersPage() {
 
   return (
     <div className="container mx-auto py-12">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Order Analytics</CardTitle>
-            <CardDescription>A visual overview of your recent orders.</CardDescription>
-          </CardHeader>
-          <CardContent>
-             <Tabs value={timeRange} onValueChange={setTimeRange}>
-                <TabsList>
-                    <TabsTrigger value="daily">Daily</TabsTrigger>
-                    <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                    <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                </TabsList>
-                <TabsContent value={timeRange} className="pt-4">
-                    {isLoading ? (
-                        <p>Loading chart...</p>
-                    ) : (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={chartData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis allowDecimals={false} />
-                                <Tooltip />
-                                <Bar dataKey="orders" fill="hsl(var(--primary))" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    )}
-                </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart /> Manage Orders
-            </CardTitle>
-            <CardDescription>
-              View all customer orders and update their status.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p>Loading orders...</p>
-            ) : orders.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground">No orders have been placed yet.</p>
-                </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Current Status</TableHead>
-                    <TableHead className="text-right">Change Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-mono text-xs">{order.id}</TableCell>
-                      <TableCell>{order.userName}</TableCell>
-                      <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                      <TableCell>${order.total.toFixed(2)}</TableCell>
-                       <TableCell>
-                        <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
-                       </TableCell>
-                      <TableCell className="text-right">
-                        <Select
-                          value={order.status}
-                          onValueChange={(newStatus) => handleStatusChange(order.id, order.userId, newStatus)}
-                        >
-                          <SelectTrigger className="w-[150px]">
-                            <SelectValue placeholder="Update status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Processing">Processing</SelectItem>
-                            <SelectItem value="Shipped">Shipped</SelectItem>
-                            <SelectItem value="Delivered">Delivered</SelectItem>
-                             <SelectItem value="Cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
+        <h1 className="text-4xl font-headline mb-2">Manage Orders</h1>
+        <p className="text-muted-foreground mb-10">
+            A complete overview of your store's orders.
+        </p>
+      <div className="grid lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-2">
+            <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                <ShoppingCart /> All Orders
+                </CardTitle>
+                <CardDescription>
+                View all customer orders and update their status.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                <p>Loading orders...</p>
+                ) : orders.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-muted-foreground">No orders have been placed yet.</p>
+                    </div>
+                ) : (
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead>Current Status</TableHead>
+                        <TableHead className="text-right">Change Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                    </TableHeader>
+                    <TableBody>
+                    {orders.map((order) => (
+                        <TableRow key={order.id}>
+                        <TableCell className="font-mono text-xs">{order.id}</TableCell>
+                        <TableCell>{order.userName}</TableCell>
+                        <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                        <TableCell>${order.total.toFixed(2)}</TableCell>
+                        <TableCell>
+                            <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <Select
+                            value={order.status}
+                            onValueChange={(newStatus) => handleStatusChange(order.id, order.userId, newStatus)}
+                            >
+                            <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="Update status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Processing">Processing</SelectItem>
+                                <SelectItem value="Shipped">Shipped</SelectItem>
+                                <SelectItem value="Delivered">Delivered</SelectItem>
+                                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                            </Select>
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                )}
+            </CardContent>
+            </Card>
+        </div>
+        <div className="lg:col-span-1">
+            <Card>
+            <CardHeader>
+                <CardTitle>Order Analytics</CardTitle>
+                <CardDescription>A visual overview of your recent orders.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Tabs value={timeRange} onValueChange={setTimeRange}>
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="daily">Daily</TabsTrigger>
+                        <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                        <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value={timeRange} className="pt-4">
+                        {isLoading ? (
+                            <div className="h-[300px] w-full flex items-center justify-center">
+                                <p>Loading chart...</p>
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" />
+                                    <YAxis allowDecimals={false} />
+                                    <Tooltip />
+                                    <Bar dataKey="orders" fill="hsl(var(--primary))" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+            </Card>
+        </div>
       </div>
     </div>
   );
