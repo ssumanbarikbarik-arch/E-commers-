@@ -36,10 +36,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ShoppingCart } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format, parseISO, startOfWeek, startOfMonth, subDays } from 'date-fns';
 
 
 type EnrichedOrder = Order & { userId: string; userName: string };
@@ -49,6 +52,7 @@ export default function ManageOrdersPage() {
   const { toast } = useToast();
   const [orders, setOrders] = useState<EnrichedOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('daily');
 
   const usersQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'users')) : null),
@@ -99,6 +103,54 @@ export default function ManageOrdersPage() {
     fetchAllOrders();
   }, [firestore, users, isLoadingUsers, toast]);
 
+  const chartData = useMemo(() => {
+    const now = new Date();
+    let data: { name: string; orders: number }[] = [];
+    let filteredOrders: EnrichedOrder[] = [];
+
+    if (timeRange === 'daily') {
+        const last7Days = Array.from({ length: 7 }, (_, i) => subDays(now, i)).reverse();
+        data = last7Days.map(day => ({ name: format(day, 'MMM d'), orders: 0 }));
+        filteredOrders = orders.filter(order => new Date(order.date) >= subDays(now, 7));
+
+        filteredOrders.forEach(order => {
+            const dayStr = format(new Date(order.date), 'MMM d');
+            const dayData = data.find(d => d.name === dayStr);
+            if (dayData) {
+                dayData.orders++;
+            }
+        });
+    } else if (timeRange === 'weekly') {
+        const last4Weeks = Array.from({ length: 4 }, (_, i) => startOfWeek(subDays(now, i * 7))).reverse();
+        data = last4Weeks.map(weekStart => ({ name: format(weekStart, 'MMM d'), orders: 0 }));
+        filteredOrders = orders.filter(order => new Date(order.date) >= subDays(now, 28));
+
+        filteredOrders.forEach(order => {
+            const weekStart = startOfWeek(new Date(order.date));
+            const weekStr = format(weekStart, 'MMM d');
+            const weekData = data.find(d => d.name === weekStr);
+            if (weekData) {
+                weekData.orders++;
+            }
+        });
+    } else if (timeRange === 'monthly') {
+        const last6Months = Array.from({ length: 6 }, (_, i) => startOfMonth(subDays(now, i * 30))).reverse();
+        data = last6Months.map(monthStart => ({ name: format(monthStart, 'MMM'), orders: 0 }));
+        filteredOrders = orders.filter(order => new Date(order.date) >= subDays(now, 180));
+
+        filteredOrders.forEach(order => {
+            const monthStart = startOfMonth(new Date(order.date));
+            const monthStr = format(monthStart, 'MMM');
+            const monthData = data.find(d => d.name === monthStr);
+            if (monthData) {
+                monthData.orders++;
+            }
+        });
+    }
+
+    return data;
+}, [orders, timeRange]);
+
   const handleStatusChange = async (
     orderId: string,
     userId: string,
@@ -139,7 +191,38 @@ export default function ManageOrdersPage() {
 
   return (
     <div className="container mx-auto py-12">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Order Analytics</CardTitle>
+            <CardDescription>A visual overview of your recent orders.</CardDescription>
+          </CardHeader>
+          <CardContent>
+             <Tabs value={timeRange} onValueChange={setTimeRange}>
+                <TabsList>
+                    <TabsTrigger value="daily">Daily</TabsTrigger>
+                    <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                    <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                </TabsList>
+                <TabsContent value={timeRange} className="pt-4">
+                    {isLoading ? (
+                        <p>Loading chart...</p>
+                    ) : (
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis allowDecimals={false} />
+                                <Tooltip />
+                                <Bar dataKey="orders" fill="hsl(var(--primary))" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    )}
+                </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
