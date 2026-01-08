@@ -17,6 +17,42 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
+function ProductPageSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-12">
+        <div className="grid md:grid-cols-[_0.7fr_1.3fr] gap-12 items-start">
+            <div className="flex flex-col-reverse md:flex-row gap-4 sticky top-24">
+                 <div className="flex md:flex-col gap-2 justify-center">
+                    <Skeleton className="aspect-square w-16 rounded-md" />
+                    <Skeleton className="aspect-square w-16 rounded-md" />
+                    <Skeleton className="aspect-square w-16 rounded-md" />
+                    <Skeleton className="aspect-square w-16 rounded-md" />
+                </div>
+                <Skeleton className="aspect-square w-full rounded-lg shadow-lg" />
+            </div>
+            <div className="flex flex-col gap-6">
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-8 w-1/3" />
+                <Separator />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                </div>
+                <Skeleton className="h-24 w-full" />
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-12 flex-1" />
+                </div>
+            </div>
+        </div>
+    </div>
+  )
+}
+
+
 export default function ProductPage() {
   const params = useParams();
   const id = typeof params.id === 'string' ? params.id : '';
@@ -38,6 +74,15 @@ export default function ProductPage() {
   const hasImages = product && product.images && product.images.length > 0 && product.images[0].url;
   const hasSizes = product && product.availableSizes && product.availableSizes.length > 0;
   const hasColors = product && product.colors && product.colors.length > 0;
+
+  React.useEffect(() => {
+    // Reset selections when product changes
+    setSelectedSize(undefined);
+    setSelectedColor(undefined);
+    setActiveImage(0);
+    setQuantity(1);
+  }, [id]);
+
 
   const handleAddToCart = () => {
     if (!product || !hasImages) return;
@@ -65,52 +110,20 @@ export default function ProductPage() {
         image: product.images[0].url,
         alt: product.images[0].alt,
     });
-    setQuantity(1);
+    toast({
+        title: "Added to Cart",
+        description: `${product.name} has been added to your cart.`
+    })
   };
 
   if (isLoading) {
-    return (
-        <div className="container mx-auto px-4 py-12">
-            <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
-                <div className="flex flex-col-reverse md:flex-row gap-4">
-                     <div className="flex md:flex-col gap-2 justify-center">
-                        <Skeleton className="aspect-square w-16 rounded-md" />
-                        <Skeleton className="aspect-square w-16 rounded-md" />
-                        <Skeleton className="aspect-square w-16 rounded-md" />
-                        <Skeleton className="aspect-square w-16 rounded-md" />
-                    </div>
-                    <Skeleton className="aspect-square w-full rounded-lg" />
-                </div>
-                <div className="flex flex-col gap-6">
-                    <Skeleton className="h-6 w-1/4" />
-                    <Skeleton className="h-12 w-3/4" />
-                    <Skeleton className="h-6 w-1/2" />
-                    <Skeleton className="h-8 w-1/3" />
-                    <Separator />
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-2/3" />
-                    </div>
-                    <Skeleton className="h-24 w-full" />
-                    <div className="flex items-center gap-4">
-                        <Skeleton className="h-10 w-32" />
-                        <Skeleton className="h-12 flex-1" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
+    return <ProductPageSkeleton />;
   }
 
-  if (!product && !isLoading) {
+  if (!product) {
     notFound();
   }
   
-  if (!product) {
-      return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="grid md:grid-cols-[_0.7fr_1.3fr] gap-12 items-start">
@@ -139,7 +152,7 @@ export default function ProductPage() {
                         priority
                     />
                 ) : (
-                    <Skeleton className="h-full w-full" />
+                    <div className="bg-muted h-full w-full flex items-center justify-center text-muted-foreground">No Image</div>
                 )}
             </div>
         </div>
@@ -226,5 +239,3 @@ export default function ProductPage() {
     </div>
   );
 }
-
-    
