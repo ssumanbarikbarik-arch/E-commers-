@@ -1,26 +1,27 @@
 
+
 "use client"
 
-import { notFound, useParams } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Star, ShoppingCart, Minus, Plus } from "lucide-react";
+import { Star, ShoppingCart, Minus, Plus, Heart, Share2, Tag, MapPin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/use-cart";
 import React from "react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 function ProductPageSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-[_0.7fr_1.3fr] gap-12 items-start">
+    <div className="container mx-auto px-4 py-8">
+        <div className="grid md:grid-cols-2 gap-12 items-start">
             <div className="flex flex-col-reverse md:flex-row gap-4 sticky top-24">
                  <div className="flex md:flex-col gap-2 justify-center">
                     <Skeleton className="aspect-square w-16 rounded-md" />
@@ -28,22 +29,35 @@ function ProductPageSkeleton() {
                     <Skeleton className="aspect-square w-16 rounded-md" />
                     <Skeleton className="aspect-square w-16 rounded-md" />
                 </div>
-                <Skeleton className="aspect-square w-full rounded-lg shadow-lg" />
-            </div>
-            <div className="flex flex-col gap-6">
-                <Skeleton className="h-6 w-1/4" />
-                <Skeleton className="h-12 w-3/4" />
-                <Skeleton className="h-6 w-1/2" />
-                <Skeleton className="h-8 w-1/3" />
-                <Separator />
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
+                <div className="relative w-full">
+                  <Skeleton className="aspect-[4/5] w-full rounded-lg shadow-lg" />
+                  <Skeleton className="absolute top-4 right-4 h-10 w-10 rounded-full" />
                 </div>
-                <Skeleton className="h-24 w-full" />
-                <div className="flex items-center gap-4">
-                    <Skeleton className="h-10 w-32" />
+            </div>
+            <div className="flex flex-col gap-4">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-7 w-1/4" />
+                <Skeleton className="h-6 w-1/2" />
+                <Separator />
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-16" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-12 w-12 rounded-md" />
+                    <Skeleton className="h-12 w-12 rounded-md" />
+                    <Skeleton className="h-12 w-12 rounded-md" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-16" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-10 w-12 rounded-md" />
+                    <Skeleton className="h-10 w-12 rounded-md" />
+                    <Skeleton className="h-10 w-12 rounded-md" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 pt-4">
+                    <Skeleton className="h-12 flex-1" />
                     <Skeleton className="h-12 flex-1" />
                 </div>
             </div>
@@ -54,12 +68,12 @@ function ProductPageSkeleton() {
 
 
 export default function ProductPage() {
-  const params = useParams();
-  const id = typeof params.id === 'string' ? params.id : '';
+  const { id } = React.use(useParams());
   
   const firestore = useFirestore();
+  const router = useRouter();
   const productRef = useMemoFirebase(
-    () => (firestore && id ? doc(firestore, 'products', id) : null),
+    () => (firestore && id ? doc(firestore, 'products', id as string) : null),
     [firestore, id]
   );
   const { data: product, isLoading } = useDoc(productRef);
@@ -110,11 +124,12 @@ export default function ProductPage() {
         image: product.images[0].url,
         alt: product.images[0].alt,
     });
-    toast({
-        title: "Added to Cart",
-        description: `${product.name} has been added to your cart.`
-    })
   };
+  
+  const handleBuyNow = () => {
+      handleAddToCart();
+      router.push('/checkout');
+  }
 
   if (isLoading) {
     return <ProductPageSkeleton />;
@@ -125,114 +140,144 @@ export default function ProductPage() {
   }
   
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="grid md:grid-cols-[_0.7fr_1.3fr] gap-12 items-start">
-        <div className="flex flex-col-reverse md:flex-row gap-4 sticky top-24">
-            {hasImages && product.images.length > 1 && (
-                <div className="flex md:flex-col gap-2 justify-center">
-                    {product.images.map((image: any, index: number) => (
-                        <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-16 overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
-                            <Image
-                                src={image.url}
-                                alt={image.alt}
-                                fill
-                                className="object-cover"
-                            />
-                        </button>
-                    ))}
-                </div>
-            )}
-             <div className="relative aspect-square w-full overflow-hidden rounded-lg shadow-lg">
-                {hasImages ? (
-                    <Image
-                        src={product.images[activeImage].url}
-                        alt={product.images[activeImage].alt}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                ) : (
-                    <div className="bg-muted h-full w-full flex items-center justify-center text-muted-foreground">No Image</div>
-                )}
-            </div>
+    <div className="bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-sm text-muted-foreground mb-4">
+            <Link href="/" className="hover:text-primary">Home</Link> / <Link href="/products" className="hover:text-primary">Products</Link> / <span className="font-medium text-foreground">{product.name}</span>
         </div>
-
-        <div className="flex flex-col gap-6">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">{product.category}</p>
-            <h1 className="text-4xl md:text-5xl font-headline">{product.name}</h1>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`h-5 w-5 ${product.rating && i < Math.round(product.rating) ? 'text-accent fill-accent' : 'text-gray-300'}`}/>
-                ))}
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          <div className="flex flex-col-reverse md:flex-row gap-4 sticky top-24">
+              {hasImages && product.images.length > 1 && (
+                  <div className="flex md:flex-col gap-2 justify-center">
+                      {product.images.map((image: any, index: number) => (
+                          <button key={image.id || index} onMouseOver={() => setActiveImage(index)} className={`relative aspect-square w-16 overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
+                              <Image
+                                  src={image.url}
+                                  alt={image.alt}
+                                  fill
+                                  className="object-cover"
+                              />
+                          </button>
+                      ))}
+                  </div>
+              )}
+              <div className="relative w-full">
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg shadow-md">
+                  {hasImages ? (
+                      <Image
+                          src={product.images[activeImage].url}
+                          alt={product.images[activeImage].alt}
+                          fill
+                          className="object-cover"
+                          priority
+                      />
+                  ) : (
+                      <div className="bg-muted h-full w-full flex items-center justify-center text-muted-foreground">No Image</div>
+                  )}
+                </div>
+                <div className="absolute top-4 right-4 flex gap-2">
+                    <Button variant="outline" size="icon" className="bg-background/50 backdrop-blur-sm rounded-full h-10 w-10">
+                        <Heart className="h-5 w-5" />
+                    </Button>
+                     <Button variant="outline" size="icon" className="bg-background/50 backdrop-blur-sm rounded-full h-10 w-10">
+                        <Share2 className="h-5 w-5" />
+                    </Button>
+                </div>
               </div>
-              <span className="text-muted-foreground text-sm">{product.rating?.toFixed(1)} ({product.reviewCount} reviews)</span>
-            </div>
           </div>
-          <p className="text-3xl font-semibold">${product.price.toFixed(2)}</p>
-          <Separator/>
-          <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-          
-          {hasColors && (
-            <div className="space-y-3">
-                <Label htmlFor="color">Color</Label>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color: string) => (
-                    <Button 
-                      key={color} 
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedColor(color)}
-                      className={cn(selectedColor === color && "ring-2 ring-primary ring-offset-2")}
-                    >
-                      {color}
-                    </Button>
-                  ))}
+
+          <div className="flex flex-col gap-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-primary">{product.category}</p>
+              <h1 className="text-2xl md:text-3xl font-bold font-headline">{product.name}</h1>
+              <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                      <div className="flex items-center bg-green-600 text-white px-2 py-0.5 rounded-md text-sm font-semibold">
+                        <span>{product.rating?.toFixed(1)}</span>
+                        <Star className="h-3 w-3 ml-1 fill-white" />
+                      </div>
+                      <span className="text-muted-foreground text-sm">{product.reviewCount} reviews</span>
+                  </div>
+              </div>
+            </div>
+            <div>
+                <span className="text-3xl font-bold">${product.price.toFixed(2)}</span>
+                <span className="text-lg text-muted-foreground line-through ml-2">${(product.price * 1.3).toFixed(2)}</span>
+                <span className="text-lg font-semibold text-green-600 ml-2">30% off</span>
+            </div>
+            <Separator/>
+            
+            {hasColors && (
+              <div className="space-y-3">
+                  <Label htmlFor="color" className="font-semibold">Color</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {product.colors.map((color: string) => (
+                      <Button 
+                        key={color} 
+                        variant="outline"
+                        onClick={() => setSelectedColor(color)}
+                        className={cn("h-auto p-1 border-2", selectedColor === color ? "border-primary" : "border-transparent")}
+                      >
+                         <div className="h-12 w-12 rounded-md bg-gray-200" style={{backgroundColor: color.toLowerCase()}} />
+                      </Button>
+                    ))}
+                  </div>
+              </div>
+            )}
+
+            {hasSizes && (
+              <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="size" className="font-semibold">Size</Label>
+                    <Link href="#" className="text-sm text-primary font-medium">Size Chart</Link>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {product.availableSizes.map((size: string) => (
+                      <Button
+                        key={size}
+                        variant="outline"
+                        size="lg"
+                        onClick={() => setSelectedSize(size)}
+                        className={cn("w-14 h-14 text-base", selectedSize === size && "ring-2 ring-primary ring-offset-2")}
+                      >
+                        {size}
+                      </Button>
+                    ))}
+                  </div>
+              </div>
+            )}
+
+            <div className="space-y-4 pt-2">
+                <h3 className="font-semibold flex items-center gap-2"><Tag className="h-5 w-5 text-primary"/> Available offers</h3>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                    <p><span className="font-medium text-foreground">Bank Offer</span> 10% off on HDFC Bank Credit Card EMI, up to ₹1,500. <Link href="#" className="text-primary font-medium">T&C</Link></p>
+                    <p><span className="font-medium text-foreground">Bank Offer</span> 5% Cashback on Flipkart Axis Bank Card. <Link href="#" className="text-primary font-medium">T&C</Link></p>
+                    <p><span className="font-medium text-foreground">Special Price</span> Get extra 15% off (price inclusive of cashback/coupon). <Link href="#" className="text-primary font-medium">T&C</Link></p>
                 </div>
             </div>
-          )}
-
-           {hasSizes && (
-            <div className="space-y-3">
-                <Label htmlFor="size">Size</Label>
-                <div className="flex flex-wrap gap-2">
-                  {product.availableSizes.map((size: string) => (
-                    <Button
-                      key={size}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedSize(size)}
-                      className={cn("w-12", selectedSize === size && "ring-2 ring-primary ring-offset-2")}
-                    >
-                      {size}
-                    </Button>
-                  ))}
-                </div>
+            
+             <div className="space-y-2 pt-2">
+                <h3 className="font-semibold flex items-center gap-2"><MapPin className="h-5 w-5 text-primary"/> Delivery</h3>
+                 <div className="flex gap-2">
+                    <Input placeholder="Enter delivery pincode" className="max-w-xs" />
+                    <Button variant="outline">Check</Button>
+                 </div>
+                 <p className="text-sm text-muted-foreground">Delivery by Mon, Jan 15. Free delivery.</p>
             </div>
-          )}
 
-          {product.specs && product.specs.length > 0 && (
-            <Card>
-              <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Specifications</h3>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-1 text-sm">
-                      {product.specs.map((spec: string) => <li key={spec}>{spec}</li>)}
-                  </ul>
-              </CardContent>
-            </Card>
-          )}
+            <Separator />
+            <p className="text-muted-foreground leading-relaxed text-sm">{product.description}</p>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center space-x-2">
-                <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => setQuantity(q => Math.max(1, q-1))}><Minus className="h-4 w-4"/></Button>
-                <Input type="number" value={quantity} readOnly className="h-10 w-16 text-center" />
-                <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => setQuantity(q => q+1)}><Plus className="h-4 w-4"/></Button>
+
+            <div className="flex items-center gap-4 pt-4">
+              <Button size="lg" className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-base py-6" onClick={handleAddToCart} disabled={!hasImage}>
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Add to Cart
+              </Button>
+               <Button size="lg" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-base py-6" onClick={handleBuyNow} disabled={!hasImage}>
+                  Buy Now
+              </Button>
             </div>
-            <Button size="lg" className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleAddToCart} disabled={!hasImages}>
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
-            </Button>
           </div>
         </div>
       </div>
