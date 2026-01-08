@@ -71,15 +71,15 @@ export default function ProductPage() {
   if (isLoading) {
     return (
         <div className="container mx-auto px-4 py-12">
-            <div className="grid md:grid-cols-2 gap-12 items-start">
-                <div className="flex flex-col gap-4">
-                    <Skeleton className="aspect-square w-full rounded-lg" />
-                    <div className="grid grid-cols-4 gap-4">
-                        <Skeleton className="aspect-square w-full rounded-md" />
-                        <Skeleton className="aspect-square w-full rounded-md" />
-                        <Skeleton className="aspect-square w-full rounded-md" />
-                        <Skeleton className="aspect-square w-full rounded-md" />
+            <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
+                <div className="flex flex-col-reverse md:flex-row gap-4">
+                     <div className="flex md:flex-col gap-2 justify-center">
+                        <Skeleton className="aspect-square w-16 rounded-md" />
+                        <Skeleton className="aspect-square w-16 rounded-md" />
+                        <Skeleton className="aspect-square w-16 rounded-md" />
+                        <Skeleton className="aspect-square w-16 rounded-md" />
                     </div>
+                    <Skeleton className="aspect-square w-full rounded-lg" />
                 </div>
                 <div className="flex flex-col gap-6">
                     <Skeleton className="h-6 w-1/4" />
@@ -113,9 +113,23 @@ export default function ProductPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="grid md:grid-cols-2 gap-12 items-start">
-        <div className="flex flex-col gap-4">
-            <div className="relative aspect-square w-full overflow-hidden rounded-lg shadow-lg">
+      <div className="grid md:grid-cols-[_0.7fr_1.3fr] gap-12 items-start">
+        <div className="flex flex-col-reverse md:flex-row gap-4 sticky top-24">
+            {hasImages && product.images.length > 1 && (
+                <div className="flex md:flex-col gap-2 justify-center">
+                    {product.images.map((image: any, index: number) => (
+                        <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-16 overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
+                            <Image
+                                src={image.url}
+                                alt={image.alt}
+                                fill
+                                className="object-cover"
+                            />
+                        </button>
+                    ))}
+                </div>
+            )}
+             <div className="relative aspect-square w-full overflow-hidden rounded-lg shadow-lg">
                 {hasImages ? (
                     <Image
                         src={product.images[activeImage].url}
@@ -128,20 +142,6 @@ export default function ProductPage() {
                     <Skeleton className="h-full w-full" />
                 )}
             </div>
-            {hasImages && product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-4">
-                    {product.images.map((image: any, index: number) => (
-                        <button key={image.id || index} onClick={() => setActiveImage(index)} className={`relative aspect-square w-full overflow-hidden rounded-md transition-opacity ${index === activeImage ? 'ring-2 ring-primary ring-offset-2' : 'opacity-70 hover:opacity-100'}`}>
-                            <Image
-                                src={image.url}
-                                alt={image.alt}
-                                fill
-                                className="object-cover"
-                            />
-                        </button>
-                    ))}
-                </div>
-            )}
         </div>
 
         <div className="flex flex-col gap-6">
