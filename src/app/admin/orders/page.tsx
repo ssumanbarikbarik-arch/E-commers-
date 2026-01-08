@@ -35,33 +35,82 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ShoppingCart, Ban, Undo2 } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import type { Order } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, parseISO, startOfWeek, startOfMonth, subDays } from 'date-fns';
+import { format, subDays, startOfWeek, startOfMonth } from 'date-fns';
 
 
 type EnrichedOrder = Order & { userId: string; userName: string };
 
-function StatCard({ title, icon, count, isLoading }: { title: string, icon: React.ReactNode, count: number, isLoading: boolean }) {
+const OrderTable = ({ orders, handleStatusChange }: { orders: EnrichedOrder[], handleStatusChange: (orderId: string, userId: string, newStatus: string) => void }) => {
+    
+    const getStatusVariant = (status: string) => {
+        switch(status) {
+            case 'Shipped': return 'default';
+            case 'Processing': return 'secondary';
+            case 'Delivered': return 'outline';
+            case 'Cancelled': return 'destructive';
+            case 'Returned': return 'destructive';
+            default: return 'secondary';
+        }
+    }
+    
+    if (orders.length === 0) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-muted-foreground">There are no orders in this category.</p>
+            </div>
+        )
+    }
+
     return (
-        <Card className="hover:bg-muted/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                {icon}
-            </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <div className="h-7 w-12 bg-muted animate-pulse rounded-md" />
-                ) : (
-                    <div className="text-2xl font-bold">{count}</div>
-                )}
-            </CardContent>
-        </Card>
+        <Table>
+            <TableHeader>
+            <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Current Status</TableHead>
+                <TableHead className="text-right">Change Status</TableHead>
+            </TableRow>
+            </TableHeader>
+            <TableBody>
+            {orders.map((order) => (
+                <TableRow key={order.id}>
+                <TableCell className="font-mono text-xs">{order.id}</TableCell>
+                <TableCell>{order.userName}</TableCell>
+                <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                <TableCell>${order.total.toFixed(2)}</TableCell>
+                <TableCell>
+                    <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                    <Select
+                    value={order.status}
+                    onValueChange={(newStatus) => handleStatusChange(order.id, order.userId, newStatus)}
+                    >
+                    <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Update status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Processing">Processing</SelectItem>
+                        <SelectItem value="Shipped">Shipped</SelectItem>
+                        <SelectItem value="Delivered">Delivered</SelectItem>
+                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        <SelectItem value="Returned">Returned</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </TableCell>
+                </TableRow>
+            ))}
+            </TableBody>
+        </Table>
     )
 }
 
@@ -169,12 +218,17 @@ export default function ManageOrdersPage() {
     return data;
 }, [orders, timeRange]);
 
-  const cancelledOrdersCount = useMemo(() => {
-    return orders.filter(order => order.status === 'Cancelled').length;
-  }, [orders]);
-
-  const returnedOrdersCount = useMemo(() => {
-    return orders.filter(order => order.status === 'Returned').length;
+  const { cancelledOrders, returnedOrders, otherOrders } = useMemo(() => {
+    return orders.reduce<{ cancelledOrders: EnrichedOrder[], returnedOrders: EnrichedOrder[], otherOrders: EnrichedOrder[] }>((acc, order) => {
+        if (order.status === 'Cancelled') {
+            acc.cancelledOrders.push(order);
+        } else if (order.status === 'Returned') {
+            acc.returnedOrders.push(order);
+        } else {
+            acc.otherOrders.push(order);
+        }
+        return acc;
+    }, { cancelledOrders: [], returnedOrders: [], otherOrders: [] });
   }, [orders]);
 
 
@@ -206,17 +260,6 @@ export default function ManageOrdersPage() {
     }
   };
   
-    const getStatusVariant = (status: string) => {
-        switch(status) {
-            case 'Shipped': return 'default';
-            case 'Processing': return 'secondary';
-            case 'Delivered': return 'outline';
-            case 'Cancelled': return 'destructive';
-            case 'Returned': return 'destructive';
-            default: return 'secondary';
-        }
-    }
-
   return (
     <div className="container mx-auto py-12">
         <h1 className="text-4xl font-headline mb-2">Manage Orders</h1>
@@ -226,73 +269,35 @@ export default function ManageOrdersPage() {
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2">
             <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                <ShoppingCart /> All Orders
-                </CardTitle>
-                <CardDescription>
-                View all customer orders and update their status.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                <p>Loading orders...</p>
-                ) : orders.length === 0 ? (
-                    <div className="text-center py-12">
-                        <p className="text-muted-foreground">No orders have been placed yet.</p>
-                    </div>
-                ) : (
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead>Current Status</TableHead>
-                        <TableHead className="text-right">Change Status</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {orders.map((order) => (
-                        <TableRow key={order.id}>
-                        <TableCell className="font-mono text-xs">{order.id}</TableCell>
-                        <TableCell>{order.userName}</TableCell>
-                        <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                        <TableCell>${order.total.toFixed(2)}</TableCell>
-                        <TableCell>
-                            <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                            <Select
-                            value={order.status}
-                            onValueChange={(newStatus) => handleStatusChange(order.id, order.userId, newStatus)}
-                            >
-                            <SelectTrigger className="w-[150px]">
-                                <SelectValue placeholder="Update status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Processing">Processing</SelectItem>
-                                <SelectItem value="Shipped">Shipped</SelectItem>
-                                <SelectItem value="Delivered">Delivered</SelectItem>
-                                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                <SelectItem value="Returned">Returned</SelectItem>
-                            </SelectContent>
-                            </Select>
-                        </TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                )}
-            </CardContent>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ShoppingCart /> Customer Orders
+                    </CardTitle>
+                    <CardDescription>
+                        View all customer orders and update their status.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="all">
+                        <TabsList>
+                            <TabsTrigger value="all">All ({otherOrders.length})</TabsTrigger>
+                            <TabsTrigger value="cancelled">Cancelled ({cancelledOrders.length})</TabsTrigger>
+                            <TabsTrigger value="returned">Returned ({returnedOrders.length})</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="all" className="pt-4">
+                            {isLoading ? <p>Loading orders...</p> : <OrderTable orders={otherOrders} handleStatusChange={handleStatusChange} />}
+                        </TabsContent>
+                        <TabsContent value="cancelled" className="pt-4">
+                            {isLoading ? <p>Loading orders...</p> : <OrderTable orders={cancelledOrders} handleStatusChange={handleStatusChange} />}
+                        </TabsContent>
+                        <TabsContent value="returned" className="pt-4">
+                             {isLoading ? <p>Loading orders...</p> : <OrderTable orders={returnedOrders} handleStatusChange={handleStatusChange} />}
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
             </Card>
         </div>
         <div className="lg:col-span-1 space-y-8">
-            <div className="grid grid-cols-2 gap-4">
-                <StatCard title="Cancelled Orders" icon={<Ban className="h-4 w-4 text-muted-foreground" />} count={cancelledOrdersCount} isLoading={isLoading} />
-                <StatCard title="Returned Orders" icon={<Undo2 className="h-4 w-4 text-muted-foreground" />} count={returnedOrdersCount} isLoading={isLoading} />
-            </div>
             <Card>
             <CardHeader>
                 <CardTitle>Order Analytics</CardTitle>
@@ -331,4 +336,4 @@ export default function ManageOrdersPage() {
   );
 }
 
-    
+  
