@@ -2,7 +2,7 @@
 
 "use client"
 
-import { notFound, useRouter } from "next/navigation";
+import { notFound, useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Star, ShoppingCart, Minus, Plus, Heart, Share2, Tag, MapPin } from "lucide-react";
@@ -270,11 +270,11 @@ export default function ProductPage() {
 
 
             <div className="flex items-center gap-4 pt-4">
-              <Button size="lg" className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-base py-6" onClick={handleAddToCart} disabled={!hasImage}>
+              <Button size="lg" className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-base py-6" onClick={handleAddToCart} disabled={!hasImages}>
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   Add to Cart
               </Button>
-               <Button size="lg" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-base py-6" onClick={handleBuyNow} disabled={!hasImage}>
+               <Button size="lg" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-base py-6" onClick={handleBuyNow} disabled={!hasImages}>
                   Buy Now
               </Button>
             </div>
