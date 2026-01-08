@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
                                 </Link>
                             </Card>
                             <Card className="hover:bg-muted/50 transition-colors">
-                                <Link href="#">
+                                <Link href="/admin/users">
                                     <CardHeader>
                                         <CardTitle className="text-xl flex items-center gap-2"><Users /> Manage Users</CardTitle>
                                     </CardHeader>

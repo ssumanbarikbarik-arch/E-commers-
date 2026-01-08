@@ -1,3 +1,4 @@
+
 export type Product = {
   id: string;
   name: string;
@@ -35,8 +36,11 @@ export type Order = {
 
 export type User = {
   id: string;
-  name: string;
   email: string;
+  firstName: string;
+  lastName: string;
+  addresses?: string[];
+  paymentMethods?: string[];
 };
 
     
