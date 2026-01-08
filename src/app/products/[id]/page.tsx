@@ -247,23 +247,13 @@ export default function ProductPage() {
                   </div>
               </div>
             )}
-
-            <div className="space-y-4 pt-2">
-                <h3 className="font-semibold flex items-center gap-2"><Tag className="h-5 w-5 text-primary"/> Available offers</h3>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                    <p><span className="font-medium text-foreground">Bank Offer</span> 10% off on HDFC Bank Credit Card EMI, up to ₹1,500. <Link href="#" className="text-primary font-medium">T&C</Link></p>
-                    <p><span className="font-medium text-foreground">Bank Offer</span> 5% Cashback on Flipkart Axis Bank Card. <Link href="#" className="text-primary font-medium">T&C</Link></p>
-                    <p><span className="font-medium text-foreground">Special Price</span> Get extra 15% off (price inclusive of cashback/coupon). <Link href="#" className="text-primary font-medium">T&C</Link></p>
+             <div className="flex items-center gap-4">
+                <Label className="font-semibold">Quantity</Label>
+                <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setQuantity(Math.max(1, quantity - 1))}><Minus className="h-4 w-4"/></Button>
+                    <Input type="number" value={quantity} readOnly className="h-8 w-14 text-center" />
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setQuantity(quantity + 1)}><Plus className="h-4 w-4"/></Button>
                 </div>
-            </div>
-            
-             <div className="space-y-2 pt-2">
-                <h3 className="font-semibold flex items-center gap-2"><MapPin className="h-5 w-5 text-primary"/> Delivery</h3>
-                 <div className="flex gap-2">
-                    <Input placeholder="Enter delivery pincode" className="max-w-xs" />
-                    <Button variant="outline">Check</Button>
-                 </div>
-                 <p className="text-sm text-muted-foreground">Delivery by Mon, Jan 15. Free delivery.</p>
             </div>
 
             <Separator />
@@ -285,3 +275,5 @@ export default function ProductPage() {
     </div>
   );
 }
+
+    
