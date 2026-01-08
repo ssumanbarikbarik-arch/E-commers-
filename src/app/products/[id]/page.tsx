@@ -68,7 +68,8 @@ function ProductPageSkeleton() {
 
 
 export default function ProductPage() {
-  const { id } = React.use(useParams());
+  const params = useParams();
+  const id = params.id;
   
   const firestore = useFirestore();
   const router = useRouter();
