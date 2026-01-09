@@ -1,8 +1,14 @@
-import { config } from 'dotenv';
+import {genkit, configureGenkit} from 'genkit';
+import {googleAI} from '@genkit-ai/google-genai';
+import {config} from 'dotenv';
+
 config();
 
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+configureGenkit({
+  plugins: [googleAI()],
+  logLevel: 'debug',
+  enableTracingAndMetrics: true,
+});
 
 export const ai = genkit({
   plugins: [googleAI()],
